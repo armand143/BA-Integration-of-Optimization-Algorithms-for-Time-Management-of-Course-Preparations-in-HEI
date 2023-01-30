@@ -1,0 +1,91 @@
+/* .navbar {
+    height: 80px;
+} */
+body {
+    padding-top: 61px;
+}
+
+.border-spacing {
+    margin-right: 40px;
+}
+
+.navbar-nav.border-spacing>li:not(:first-child) {
+    border-left: 1px solid gray;
+}
+
+
+/* Default styles for navbar */
+/* nav { */
+/* height: 80px; */
+/* other styles */
+/* } */
+
+/* Media query for screens smaller than 768px */
+@media (max-width: 768px) {
+    nav {
+        height: 50px;
+        /* other styles for smaller screens */
+    }
+    .navbar-brand {
+        font-size: 1.5rem;
+     }
+     .navbar-nav {
+        font-size: 1.5rem;
+     }
+     .navbar-toggler-icon {
+        width: 20px;
+        height: 20px;
+     }
+
+     .navbar-collapse {
+        background-color: rgba(128, 128, 128, 1);
+    }
+    .col-sm-3 {
+        flex-wrap:wrap;
+    }
+    
+    .col-sm-3 .form-group {
+        width: 100%; /* or any other value that works for you */
+    }
+    
+}
+
+.navbar-toggler {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
+
+
+
+/* Media query for screens larger than 992px */
+@media (min-width: 992px) {
+    nav {
+        height: 60px;
+        /* other styles for larger screens */
+    }
+
+
+}
+
+
+.form-group label {
+    float: left;
+    width: 200px;
+}
+
+.form-group input {
+    float: left;
+    width: 200px;
+}
+
+.col-form-label {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+
+/* table {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+  } */
