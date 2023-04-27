@@ -1,6 +1,6 @@
 # BA-timeOptimizer-DJango-SpringBoot
 
-<p1>Thesis Project: Integration of Optimization Algorithms for Time Management of Course Preparations in Higher Education</p1>
+#Thesis Project: Integration of Optimization Algorithms for Time Management of Course Preparations in Higher Education
 
 This repository contains an extension to an existing course optimization system that helps lecturers allocate preparation time for different aspects of their courses, such as content, didactic, and presentation. The extension adds a new optimization method based on weighted averages, complementing the existing four optimization methods. The system connects a Django web application with a Spring Boot backend to provide a seamless user experience.
 Introduction
