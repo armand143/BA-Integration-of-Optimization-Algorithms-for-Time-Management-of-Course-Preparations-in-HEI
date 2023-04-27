@@ -25,83 +25,72 @@ To run this project, you will need:
     Maven 3.8 or higher
 
 Installation
+Clone the repository:
 
-    Clone the repository:
+    git clone https://github.com/yourusername/course-optimization-extension.git
 
-git clone https://github.com/yourusername/course-optimization-extension.git
+Change to the project directory:
 
-    Change to the project directory:
-
-cd course-optimization-extension
+    cd course-optimization-extension
 
 Setting up the Django web application
+Set up a Python virtual environment and activate it:
 
-    Set up a Python virtual environment and activate it:
+    python3 -m venv venv
+    source venv/bin/activate
 
-python3 -m venv venv
-source venv/bin/activate
+Install Django and other required Python packages:
 
-    Install Django and other required Python packages:
+    pip install -r requirements.txt
 
-pip install -r requirements.txt
+Navigate to the Django project directory:
 
-    Navigate to the Django project directory:
+    cd django_project
 
-cd django_project
+Apply migrations:
 
-    Apply migrations:
+    python manage.py migrate
 
-python manage.py migrate
+Create a superuser to access the admin panel:
 
-    Create a superuser to access the admin panel:
-
-python manage.py createsuperuser
+    python manage.py createsuperuser
 
 Setting up the Spring Boot backend
+Navigate to the Spring Boot project directory:
 
-    Navigate to the Spring Boot project directory:
+    cd ../spring_boot_project
 
-cd ../spring_boot_project
+Build the Spring Boot application using Maven:
 
-    Build the Spring Boot application using Maven:
-
-mvn clean install
+    mvn clean install
 
 Usage
 Running the Django web application
+Start the Django development server:
 
-    Start the Django development server:
-
-python manage.py runserver
+    python manage.py runserver
 
 Running the Spring Boot backend
+In a separate terminal, navigate to the Spring Boot project directory:
 
-    In a separate terminal, navigate to the Spring Boot project directory:
+    cd spring_boot_project
+    
+Run the Spring Boot application:
 
-cd spring_boot_project
-
-    Run the Spring Boot application:
-
-mvn spring-boot:run
+    mvn spring-boot:run
 
 Accessing the application
+Open your web browser and navigate to the Django web application:
 
-    Open your web browser and navigate to the Django web application:
+    http://127.0.0.1:8000/
 
-http://127.0.0.1:8000/
-
-    Log in with the superuser credentials you created earlier.
-
-    Enter course information, aspect weights, and other relevant parameters.
-
-    Choose the weighted average optimization method or one of the other four available methods.
-
-    Run the optimization process to obtain the time allocation results.
-
-    Review the results and adjust the weights or other parameters as needed.
+Log in with the superuser credentials you created earlier.
+Enter course information, aspect weights, and other relevant parameters.
+Choose the weighted average optimization method or one of the other four available methods.
+Run the optimization process to obtain the time allocation results.
+Review the results and adjust the weights or other parameters as needed.
 
 Contributing
-
 If you would like to contribute to this project, please follow these steps:
 
     Fork the repository
