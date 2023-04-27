@@ -103,9 +103,10 @@ License
 This project is licensed under the MIT License.
 Acknowledgements
 
-    OpenAI for providing guidance through their ChatGPT model
-    The original authors of the course optimization system
-    The Django and Spring Boot communities for their extensive documentation and support
+    -
+    -
+    -
+    - The Django and Spring Boot communities for their extensive documentation and support
 
 Support
 If you encounter any issues or have questions, please open an issue on the GitHub repository or contact the project maintainers.
