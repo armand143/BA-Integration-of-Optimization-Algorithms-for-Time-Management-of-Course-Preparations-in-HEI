@@ -135,6 +135,7 @@ public class SemesterTimes {
     // *** Gibt die Zeit f?r die Pr?sentationsvorbereitung zur?ck
     public double getTimePresentation ( int courseNo ) {
         if ( courseNo < 0 || courseNo >= courseNumber ) {
+            System.err.println("Course number out of range!" + courseNo);
             System.err.println("Error: Course number out of range!");
             return (double) -1;
         }

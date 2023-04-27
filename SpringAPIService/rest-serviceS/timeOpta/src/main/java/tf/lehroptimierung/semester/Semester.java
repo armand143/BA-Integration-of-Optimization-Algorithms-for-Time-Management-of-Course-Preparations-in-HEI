@@ -1,6 +1,10 @@
 package tf.lehroptimierung.semester;
 
+import java.util.Map;
+
 public class Semester {
+
+    private Map<String, Double> weights;
 
     private final int courseNumber; // Anzahl der Kurse in dem Semester
 
@@ -50,7 +54,7 @@ public class Semester {
             return;
         }
 
-        this.students [ courseNo ]= students;
+        this.   students [ courseNo ]= students;
     }
 
     // *** Setzt die Anzahl der Semesterwochenstunden in einem Kurs
@@ -85,33 +89,33 @@ public class Semester {
     }
 
     // *** Setzt die Faktoren f?r den Kursinhalt eines Kurses
-    public void setCourseContent ( int courseNo, double familiarity, double complexity) {
+    public void setCourseContent ( int courseNo, double familiarity, double complexity, double weight) {
         if ( courseNo < 0 || courseNo >= courseNumber ) {
             System.err.println("Error: Course number out of range!");
             return;
         }
 
-        this.course [ courseNo ].setContent( familiarity, complexity );
+        this.course [ courseNo ].setContent( familiarity, complexity, weight );
     }
 
     // *** Setzt die Faktoren f?r die Didaktik in einem Kurs
-    public void setCourseDidactic ( int courseNo, double familiarity, double complexity) {
+    public void setCourseDidactic ( int courseNo, double familiarity, double complexity, double weight) {
         if ( courseNo < 0 || courseNo >= courseNumber ) {
             System.err.println("Error: Course number out of range!");
             return;
         }
 
-        this.course [ courseNo ].setDidactic( familiarity, complexity );
+        this.course [ courseNo ].setDidactic( familiarity, complexity, weight );
     }
 
     // *** Setzt die Faktoren f?r die Pr?sentation in einem Kurs
-    public void setCoursePresentation ( int courseNo, double finished, double time0, double pres0, double complexity) {
+    public void setCoursePresentation ( int courseNo, double finished, double time0, double pres0, double complexity, double weight) {
         if ( courseNo < 0 || courseNo >= courseNumber ) {
             System.err.println("Error: Course number out of range!");
             return;
         }
 
-        this.course [ courseNo ].setPresentation( finished, time0, pres0, complexity );
+        this.course [ courseNo ].setPresentation( finished, time0, pres0, complexity, weight );
     }
 
     // *** Setzt den Namen eines Kurses
@@ -168,11 +172,21 @@ public class Semester {
     public double calcMin ( SemesterTimes times) {
         double sum = 1e33;
         for ( int i = 0; i < courseNumber; i++) {
+        /*    System.err.println("DEB**********Error: times.getTimeContent ( i )" + times.getTimeContent ( i ));*/
+/*            System.err.println("DEB**********Error: times.getTimeDidactic ( i )" + times.getTimeDidactic ( i ));
+            System.err.println("DEB**********Error: times.getTimePresentation ( i )" + times.getTimePresentation ( i ));*/
             sum = Math.min( sum, course [ i ].calcMin( times.getTimeContent ( i ), times.getTimeDidactic ( i ), times.getTimePresentation ( i ) ) );
         }
         return sum;
     }
 
+    public double calcWeightedAverage ( SemesterTimes times) {
+        double sum = 0;
+        for ( int i = 0; i < courseNumber; i++) {
+            sum += course [ i ].calcWeightedAverage( times.getTimeContent ( i ), times.getTimeDidactic ( i ), times.getTimePresentation ( i )) * Math.sqrt( (double) students [ i ] * (double) lecTime [ i ] * impact [ i ] );
+        }
+        return sum;
+    }
 
 
 }

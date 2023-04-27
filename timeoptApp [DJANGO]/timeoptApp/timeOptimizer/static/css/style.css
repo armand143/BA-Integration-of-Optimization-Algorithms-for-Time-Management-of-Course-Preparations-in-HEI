@@ -2,7 +2,16 @@
     height: 80px;
 } */
 body {
-    padding-top: 61px;
+    padding-top: 70px !important;
+    background-color: #FFFFFF;
+    position: relative;
+
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+
 }
 
 .border-spacing {
@@ -14,40 +23,18 @@ body {
 }
 
 
-/* Default styles for navbar */
-/* nav { */
-/* height: 80px; */
-/* other styles */
-/* } */
-
 /* Media query for screens smaller than 768px */
 @media (max-width: 768px) {
     nav {
         height: 50px;
-        /* other styles for smaller screens */
     }
-    .navbar-brand {
-        font-size: 1.5rem;
-     }
-     .navbar-nav {
-        font-size: 1.5rem;
-     }
-     .navbar-toggler-icon {
+    .navbar-toggler-icon {
         width: 20px;
         height: 20px;
-     }
-
-     .navbar-collapse {
+    }
+    .navbar-collapse {
         background-color: rgba(128, 128, 128, 1);
     }
-    .col-sm-3 {
-        flex-wrap:wrap;
-    }
-    
-    .col-sm-3 .form-group {
-        width: 100%; /* or any other value that works for you */
-    }
-    
 }
 
 .navbar-toggler {
@@ -56,6 +43,17 @@ body {
     top: 20px;
 }
 
+
+.login-card {
+    background-color: #568076;
+
+}
+
+.navbar-toggler {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+}
 
 
 /* Media query for screens larger than 992px */
@@ -85,7 +83,156 @@ body {
 }
 
 
-/* table {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr);
-  } */
+/*Left and Right Lines centering content*/ 
+.vertical-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: rgba(0, 0, 0, 0.2); /* Change the color and opacity to make the lines less visible */
+    pointer-events: none; /* Prevent the lines from interfering with clicks */
+    z-index: 1; /* Make sure the lines stay below the content and footer */
+}
+
+.left-line {
+    left: 10%;
+}
+
+.right-line {
+    right: 10%;
+}
+
+.content-area {
+    margin-left: 10%;
+    margin-right: 10%;
+    flex: 1;
+    position: relative;
+    z-index: 2; /* Ensure the content area stays above the vertical lines */
+    background-color: #FFFFFF; 
+
+}
+
+.footer {
+    background-color: #568076; 
+    color: #ffffff;
+    text-align: center;
+    padding: 1rem;
+    width: 100%;
+    z-index: 2; /* Ensure the footer stays above the vertical lines */
+    position: relative;
+    bottom: 0;
+
+}
+
+@media only screen and (max-width: 768px) {
+    .card-body input {
+        width: 100%;
+        max-width: 100%;
+    }
+
+}
+
+@media (max-width: 768px) {
+    .form-group input {
+        width: 100%;
+    }
+    .form-group label {
+        width: 100%;
+        margin-right: 10px;
+        margin-top: 10px;
+        font-weight: bold;
+        word-wrap: break-word;
+        word-break: break-word;
+    }
+  }
+  
+
+/* ----------------------------------------------------------------------------------------- */
+.hide-content {
+    max-height: 55px;
+    overflow: hidden;
+}
+
+.custom-link {
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #007bff;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    transition-duration: 0.4s;
+    width: 60px; /* Add a fixed width */
+    box-sizing: border-box; /* Add box-sizing */
+}
+
+.custom-link:hover {
+    background-color: #0056b3;
+    color: #ffffff;
+}
+
+.button-wrapper {
+    display: inline-block;
+}
+
+.text_green{
+    color: green;
+}
+
+
+/* ------------------------------------------------------------------------------------------------------- */
+.tooltip-icon {
+    display: inline-block;
+    background-color: #333;
+    color: #fff;
+    border-radius: 50%;
+    font-size: 12px;
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    cursor: help;
+    margin-left: 4px;
+    line-height: 16px;
+    position: relative;
+}
+
+.tooltip-icon:hover::after {
+    content: attr(title);
+    position: absolute;
+    background-color: #333;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 10;
+    white-space: nowrap;
+    left: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-left: 8px;
+}
+
+.tooltip-inner {
+    background-color: #568076;
+  }
+
+
+
+
+
+/* -------------------------------------------------------------------------------------------------------- */
+  .aspects_info_card{
+    position: absolute;
+    bottom: 0;
+    max-height: 600px; /* desired height limit here */
+    overflow-y: auto; /* scrollbar if the content exceeds the limit */
+}
+
+.profile_cards{
+    max-height: 500px; /* desired height limit here */
+    overflow-y: auto; /* scrollbar if the content exceeds the limit */
+}

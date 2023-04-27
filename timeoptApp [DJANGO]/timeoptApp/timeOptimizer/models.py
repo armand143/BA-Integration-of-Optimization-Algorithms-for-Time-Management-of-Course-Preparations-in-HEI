@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import User, AbstractUser, Group, Permission
+from django.utils import timezone
 
 # Create your models here.
 
@@ -38,31 +40,52 @@ class courseStudentCount(models.Model):
 
 class course(models.Model):
     course_name = models.CharField(max_length=250)
-    courseNum = models.IntegerField()
     course_credits = models.IntegerField()
-
-    courseContent_data = models.OneToOneField(courseContent, on_delete=models.SET_NULL, null = True, blank = True)
-    courseDidactic_data = models.OneToOneField(courseDidactic, on_delete=models.SET_NULL, null = True, blank = True)
-    coursePresentation_data = models.OneToOneField(coursePresentation, on_delete=models.SET_NULL, null = True, blank = True)
-    courseImpact_data = models.OneToOneField(courseImpact, on_delete=models.SET_NULL, null = True, blank = True)
-    courseLectTime_data = models.OneToOneField(courseLectTime, on_delete=models.SET_NULL, null = True, blank = True)
-    courseStudentCount_data = models.OneToOneField(courseStudentCount, on_delete=models.SET_NULL, null = True, blank = True)
+    course_description = models.TextField(default="No description available")
+    lecturer_name = models.CharField(max_length=250, default="Anonymous Lecturer")
 
     def __str__(self):
         return self.course_name
-
-class lecturer(models.Model):
-    lecturer_name = models.CharField(max_length=250)
-    lecturer_title = models.CharField(max_length=250)
-    courseOffered = models.ManyToManyField(course, null=True, blank=True)
-
-    def __str__(self):
-        return self.lecturer_title + " " + self.lecturer_name
 
 class semester(models.Model):
     semester_name = models.CharField(max_length=250)
     semesterModules = models.JSONField() #Should be used to control to the availability of different courses
     coursesInSemester = models.JSONField()
+
+    def __str__(self):
+        return self.semester_name
+    
+
+
+class CustomUser(AbstractUser):
+    groups = models.ManyToManyField(Group, related_name="custom_user_groups", blank=True)
+    user_permissions = models.ManyToManyField(Permission, related_name="custom_user_permissions", blank=True)
+
+
+class Lecturer(models.Model):
+    TITLE_CHOICES = [
+        ('...', '...'),
+        ('Dr.', 'Dr.'),
+        ('Prof.', 'Prof.'),
+        ('Assoc. Prof.', 'Assoc. Prof.'),
+        ('Asst. Prof.', 'Asst. Prof.'),
+        ('Lecturer', 'Lecturer'),
+        ('Instructor', 'Instructor'),
+        ('Teaching Assistant', 'Teaching Assistant'),
+    ]
+    lecturer_name = models.CharField(max_length=250)
+    title = models.CharField(max_length=20, choices=TITLE_CHOICES)
+    courseOffered = models.ManyToManyField(course, blank=True)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='lecturer_profile')
+    picked_semester = models.ManyToManyField(semester, blank=True)
+    time_available = models.IntegerField(default=0)
+    profile_picture = models.ImageField(upload_to="profile_pics", default= "default_pro_pic.jpg")
+    lecturer_email = models.CharField(max_length=250, default="foobar@jetmail.com")
+    
+    def __str__(self):
+        return self.title + " " + self.lecturer_name
+
+
 
 class optData(models.Model):
     OptimizationMethods = [
@@ -70,25 +93,26 @@ class optData(models.Model):
         ('sum', 'sum'),
         ('sqrt', 'sqrt'),
         ('min', 'min'),
+        ('weightedAverage', 'weightedAverage'),
     ]
     semesterName = models.CharField(max_length=250)
-    totalHours = models.DecimalField(max_digits=5, decimal_places=2)
-    optMethod = models.CharField(max_length=10, choices=OptimizationMethods)
-    courses = models.JSONField(default={}, null=False, blank=True) #add all courses with configAttributes iteratively here, as json dict
-    lecturer = models.ForeignKey(lecturer, on_delete=models.CASCADE)
+    totalHours = models.DecimalField(default = 0, max_digits=5, decimal_places=2)
+    optMethod = models.CharField(max_length=20, choices=OptimizationMethods)
+    courses = models.JSONField(default=dict, null=False, blank=True) #add all courses with configAttributes iteratively here, as json dict
+    lecturer = models.ForeignKey(Lecturer, on_delete=models.CASCADE, default=None)
     picked_course = models.ForeignKey(course, on_delete=models.CASCADE, null=True, blank=True)
     # counter = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+    edited_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=50, default='default_value')
     #picked_course = models.ManyToManyField(course, null = True, blank=True)
-    # lecturer = models.OneToOneField(lecturer, on_delete=models.CASCADE)
-    
-    # def save(self, *args, **kwargs):
-    #     if not self._state.adding:
-    #         self.counter += 1
-    #         super().save(*args, **kwargs)
 
     def __str__(self):
         return  "/" + self.semesterName + "/" + self.optMethod + "/" + str(self.lecturer)
+    
+    # def save(self, *args, **kwargs):
+    #     self.edited_at = timezone.now()
+    #     super().save(*args, **kwargs)
 
 
 class optResults(models.Model):
@@ -101,8 +125,13 @@ class optResults(models.Model):
         label = models.CharField(max_length=20, choices=labelChoices)
         semesterName = models.CharField(max_length=250)
         totalHours = models.FloatField()
-        optMethod = models.CharField(max_length=10)
+        optMethod = models.CharField(max_length=20)
         optimalValue = models.FloatField(default=0.0)
         # lecturer = models.ForeignKey(lecturer, on_delete=models.CASCADE)
         optimizationResults = models.JSONField()
         optDataObj = models.OneToOneField(optData, on_delete=models.CASCADE, related_name='opt_results', default=1)
+        created_at = models.DateTimeField(auto_now_add=True)
+        edited_at = models.DateTimeField(auto_now=True)
+        status = models.CharField(max_length=50, default='default_value')
+        update_status = models.CharField(max_length=50, default='default_value')
+

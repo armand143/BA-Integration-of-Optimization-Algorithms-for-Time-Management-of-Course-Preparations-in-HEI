@@ -10,6 +10,8 @@ public class AspectPresentation {
 
     private double k; // Wert zwischen 1 und etwa 20 für die Komplexität der Präsentation
 
+    private double w;
+
     AspectPresentation () {
 
         o = 0;
@@ -19,9 +21,11 @@ public class AspectPresentation {
         p0 = 0;
 
         k = 1;
+
+        w = 1;
     }
 
-    AspectPresentation (double finished, double time0, double pres0, double complexity) {
+    AspectPresentation (double finished, double time0, double pres0, double complexity, double weight) {
 
         o = finished;
 
@@ -30,9 +34,11 @@ public class AspectPresentation {
         p0 = pres0;
 
         k = complexity;
+
+        w = weight;
     }
 
-    void set (double finished, double time0, double pres0, double complexity) {
+    void set (double finished, double time0, double pres0, double complexity, double weight) {
 
         o = finished;
 
@@ -41,6 +47,12 @@ public class AspectPresentation {
         p0 = pres0;
 
         k = complexity;
+
+        w = weight;
+    }
+
+    public double getWeight() {
+        return w;
     }
 
     double calc (double time) {

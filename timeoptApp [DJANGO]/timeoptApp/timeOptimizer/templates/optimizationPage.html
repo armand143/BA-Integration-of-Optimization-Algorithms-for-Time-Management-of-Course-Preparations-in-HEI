@@ -24,13 +24,26 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
     <a class="navbar-brand" href="#">Time Optimizer Tool</a>
+
+    {% if messages %}
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger"> <strong> {{ message }} </strong></div>
+        {% elif message.tags == 'success' %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% else %}
+            <div class="alert alert-info">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+    {% endif %}
+    
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto border-spacing">
             <li class="nav-item">
-                <a class="nav-link" href="#">Home</a>
+                <a class="nav-link" href="{% url 'profile_view' %}">Profile</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="#">About</a>
@@ -38,78 +51,176 @@
             <li class="nav-item">
                 <a class="nav-link" href="#">Contact</a>
             </li>
+            {% if request.user.is_authenticated %}
+            <li>
+                <a class="nav-link" href="{% url 'logout_view' %}">Logout</a>
+            </li>
+            {% endif %}
         </ul>
     </div>
 </nav>
 
 <body>
 
+    <div class = "content-area">
+        <div class="container-fluid">
+
+            <h1 class="text-center">Here, we optimize the time for course preparation</h1>
+            <div class = "row">
+                <div class = "col-12 mx-auto">
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                <th>course parameter</th>
+                                <th>optimization results</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for obj in all_params %}
+                                    <tr>
+                                        <td>
     
-    <div class="container-fluid">
-
-        <h1 class="text-center">Here, we optimize the time for course preparation</h1>
-        <div class = "row">
-            <div class = "col-12 col-md-8 mx-auto">
-                    <table class="table table-bordered table-hover">
-                        <thead class="thead-dark">
-                            <tr>
-                            <th>course parameter</th>
-                            <th>optimization results</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for obj in all_params %}
-                            <tr>
-                                <td> 
-                                    semester name: {{ obj.semesterName }} <br><br>
-                                    total hours: {{ obj.totalHours }}<br><br>
-                                    optimization method: {{ obj.optMethod }}<br><br>
-                                    lecturer name: {{ obj.lecturer }}<br><br>
-                                    courses: <br>{{ obj.courses }}<br><br>
-
-                                    <div class="text-left">
-                                        <a href="{% url 'addCourseParameter' id=obj.id %}" class="btn-sm btn-primary">+ add a course </a> &nbsp;
-                                        <a href="{% url 'optimizerWebService' optDataID=obj.id %}" class="btn-sm btn-success">optimize </a> &nbsp;
-                                        <a href="{% url 'allCourseParameters' %}" class="btn-sm btn-danger">delete </a> &nbsp;
-                                    </div>
-                                </td>
-                                <td >
-                                {% if obj.opt_results.optimizationResults|length != 0 %}
-                                    <div class = row>
-                                        <div class="col-md-8">
-                                            {% for k,v in obj.opt_results.optimizationResults.items %}
-                                                <strong>{{k}}</strong> <br>
-                                                {% for k1,v1 in v.items %}
-                                                    {{k1}}: {{v1}}<br>
-
+                                            <div class = "content-to-toggle hide-content">
+    
+                                                {% with obj.courses|length as num_courses %}
+                                                <h5 style="font-weight: bold;"> {{obj.semesterName}} | {{obj.totalHours}} hrs | <span class="text_green"> {{ obj.optMethod }} </span> | {{ num_courses }} course(s)
+                                                </h5>
+                                                {% endwith %}
+                                                {% if forloop.first %}
+                                                <span class="text_green">(most recent)</span>
+                                                {% endif %}
+    
+                                                <br>
+                                                <br>
+    
+                                                semester name: {{obj.semesterName}} <br><br>
+                                                total hours: {{obj.totalHours}}<br><br>
+                                                optimization method: {{ obj.optMethod }}<br><br>
+                                                lecturer name: {{request.user.lecturer_profile.lecturer_name}}<br><br>
+                                                courses: <br>
+                                                
+                                                {% for k_course_name,v_course_aspects in obj.courses.items %}
+                                                    <strong><a href="{% url 'editCourse' optData_id=obj.id key=k_course_name %}"> {{k_course_name}} </a></strong> <br>
+    
+                                                    {% for k1, v1 in v_course_aspects.items %}
+                                                        <strong> {{k1}} </strong> <br>
+    
+                                                        {% for k2, v2 in v1.items %}
+                                                            {{k2}} : {{v2}}
+                                                            <br>
+    
+                                                        {% endfor %}
+                                                    {% endfor %}
+                                                    <br><br>
                                                 {% endfor %}
-                                                <hr>
-                                            {% endfor %}
+                                                
+                                                <div class="text-left">
+                                                    <a href="{% url 'addCourseParameter' id=obj.id %}" class="btn-sm btn-primary">+ add a course </a> &nbsp;
+                                                    <a href="{% url 'optimizerWebService' optDataID=obj.id %}" class="btn-sm btn-success">optimize </a> &nbsp;
+                                                    <a href="{% url 'delete_optData' optData_id=obj.id %}" class="btn-sm btn-danger">delete </a> &nbsp;
+                                                </div>
+    
+                                            </div>
+    
+                                            <br>
+    
+                                        </td>
+    
+                                        <td class="d-flex">
+                                            <div class = "content-to-toggle hide-content flex-grow-1">
+    
+                                                {% if obj.opt_results.optimizationResults|length != 0 %}
+    
+                                                    <h5 style="font-weight: bold; color: green;">
+                                                        results
+                                                    </h5>
+
+                                                    {% if obj.edited_at > obj.opt_results.edited_at  %}
+                                                    <p style="color: red;"> ({{obj.opt_results.status}}) </p>     
+                                                    {% else %}
+                                                    {% endif %} 
+
+                                                    {% if obj.opt_results.update_status == "(new)" %}
+                                                    <p style="color: green;"> {{obj.opt_results.update_status}} </p> 
+                                                    {% else %}
+                                                    {% endif %}
 
 
-                                        </div>
-                                        <div class=" text-left">
-                                            that button
-                                        </div>
-                                    </div>
-                                {% else %}
-                                    No optimization results found
-                                {% endif %}
+             
+                                                    
 
+                                                    <br>
+                                                
+                                                    {% for k,v in obj.opt_results.optimizationResults.items %}
+                                                        <strong>{{k}}</strong> <br>
+                                                        {% for k1,v1 in v.items %}
+                                                            {{k1}}: {{v1}}<br>
+        
+                                                        {% endfor %}
+                                                        <hr>
 
+                                                    {% endfor %}
+    
+                                                {% else %}
+    
+                                                    <h5 style="font-weight: bold; color: red;">
+                                                        No optimization results found
+                                                    </h5>
+                                                {% endif %}
+    
+                                            </div>
+                                            <div class="button-wrapper">
+                                                <a class="toggle-content-link custom-link">
+                                                    show
+                                                </a>
 
-
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-
+                                                <a class="btn-sm btn-secondary " href = "{% url 'optimizationOverview' optData_id=obj.id %}">
+                                                    summary
+                                                </a>
+                                            </div>                                   
+    
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+    
+                </div>
             </div>
+    
         </div>
-
     </div>
+    
 
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleButtons = document.querySelectorAll('.toggle-content-link');
+            
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const row = button.parentElement.parentElement.parentElement;
+                    const contentElements = row.querySelectorAll('.content-to-toggle');
+                    contentElements.forEach(content => {
+                        content.classList.toggle('hide-content');
+                    });
+                    
+                    if (button.textContent.trim() === 'show') {
+                        button.textContent = 'hide';
+                    } else {
+                        button.textContent = 'show';
+                    }
+                });
+            });
+        });
+    </script>
+    
+
+
+    <footer class="footer">
+        <p>Content Here</p>
+    </footer>
+    
 </body>
 <!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->

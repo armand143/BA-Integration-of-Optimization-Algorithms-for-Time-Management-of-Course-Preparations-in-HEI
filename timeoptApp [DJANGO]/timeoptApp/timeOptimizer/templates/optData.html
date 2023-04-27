@@ -1,7 +1,5 @@
 {% load static %}
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
-    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
 <!doctype html>
 <html lang="en">
@@ -16,22 +14,39 @@
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
     <title>course configurations</title>
-    
+
     <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="{% static 'js/script.js' %}"></script>  
+
+
+
+
 
 </head>
 
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
     <a class="navbar-brand" href="#">Time Optimizer Tool</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+
+    {% if messages %}
+    {% for message in messages %}
+        {% if message.tags == 'error' %}
+            <div class="alert alert-danger"> <strong> {{ message }} </strong></div>
+        {% elif message.tags == 'success' %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% else %}
+            <div class="alert alert-info">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+    {% endif %}
+
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto border-spacing">
             <li class="nav-item">
-                <a class="nav-link" href="#">Home</a>
+                <a class="nav-link" href="{% url 'profile_view' %}">Profile</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="#">About</a>
@@ -39,178 +54,629 @@
             <li class="nav-item">
                 <a class="nav-link" href="#">Contact</a>
             </li>
+            {% if request.user.is_authenticated %}
+            <li>
+                <a class="nav-link" href="{% url 'logout_view' %}">Logout</a>
+            </li>
+            {% endif %}
         </ul>
     </div>
 </nav>
 
+
 <body>
 
-    
-    <div class="container-fluid">
-
+    <div class="content-area">
         <h1 class="text-center">Please enter course configurations</h1>
 
+        <br>
+
         <div class="row ">
-            <div class="col-12 col-md-8 mx-auto">
+
+            <div class="col-4">
+                <h5>
+                    The courses for this optimization process will be displayed here
+                </h5>
+
+                {% if current_optData.courses|length > 0 %}
+                {% for course,course_content in current_optData.courses.items %}
+                <ul>
+                    <li>
+                        <a href="{% url 'editCourse' optData_id=current_optData.id key=course %}">
+                            {{course}}
+                        </a>
+
+                        <a href="{% url 'delete_optCourse' optData_id=current_optData.id key=course %}"
+                            class="btn-sm btn-danger"> x </a>
+                    </li>
+                </ul>
+                {% endfor %}
+
+
+                {% else %}
+
+                <h3 class="mt-5">
+                    No courses here! You might want to return to your <a href="{% url 'profile_view' %}"> profile</a> to
+                    add courses
+                </h3>
+
+
+                {% endif %}
+
+                <div class = "card aspects_info_card">
+                    <div class = "card-body ">
+                        <h5> More details to different parameters for courses</h5>
+
+                        <strong> Content:</strong>
+                        <br>
+                        Content Aspect refers to the actual substance or material that makes up the course. This includes the topics, concepts, theories, and facts being taught. It covers everything the students need to learn and understand in a specific course or subject.
+                        <hr>
+
+                        <strong> Didactic:</strong>
+                        <br>
+                        Didactic Aspect refers to the teaching methods, strategies, and techniques used to present the course content effectively. This includes how the material is organized, explained, and demonstrated to facilitate students' learning and understanding of the topics being taught.
+                        <hr>
+
+                        <strong> Presentation:</strong>
+                        <br>
+                        Presentation Aspect refers to how the course material is organized, delivered, and communicated to the students. It includes elements such as the structure of the lectures, the choice of examples or case studies, the use of visual aids, and the methods of engaging students in the learning process.
+                        <hr>
+
+                        <strong> Impact:</strong>
+                        <br>
+                        refers to the effect that a course has on students' learning and understanding of the material. It relates to the teaching methods and content delivery, and how effectively they help students grasp the concepts being taught.
+                        <hr>
+
+
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="col-8">
+                <h5>
+                    please enter information for course: <span style="color: blue; font-size: 32px;"> {{ current_optData.picked_course }}</span> |
+                    semester: <span style="color: blue"> {{request.user.lecturer_profile.picked_semester.first}} </span> |
+                    hours available:  <span style="color: blue"> {{ request.user.lecturer_profile.time_available }}hrs </span>
+                </h5>
+
                 <div class="card mb-5">
                     <div class="card-body">
-                        <div id = "form_container">
+                        <div id="form_container">
+
+                            <!-- {% if form_errors %}
+                                <div class="alert alert-danger">
+                                    <strong>Error:</strong> Please fix the errors below.
+                                </div>
+                            {% endif %} -->
+
+                            <!-- {{ form_errors }} -->
+
                             <form method="post">
                                 {% csrf_token %}
-    
+
                                 <input type="hidden" id="current_form" value="{{ current_form_index }}">
-    
-                                <div class = "row mx-4">
-                                    &nbsp;&nbsp;
+
+                                <div class="row">
+                                    <!-- <div class="col-xs-3 mx-5">
                                         <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.picked_course.id_for_label }}">course:</label>
-                                            {{ form.picked_course }}
+                                            <label class="col-form-label"
+                                                for="{{ form.semesterName.id_for_label }}">semesterName:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Go to profile if you need to change the semester">?</span>
+                                            </label>
+                                            <span style="font-weight: bold;">
+                                                {{request.user.lecturer_profile.picked_semester.first}} </span>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="col-xs-3 mx-5">
+                                        <div class="form-group" style="display: flex; flex-direction: column">
+                                            <label class="col-form-label"
+                                                for="{{ form.totalHours.id_for_label }}">totalHours:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Go to profile if you need to change the amount of time you have available for course preparation ">?</span>
+                                            </label>
+
+                                            <strong> {{ request.user.lecturer_profile.time_available }} </strong>
+
+                                        </div>
+                                    </div> -->
+
+                                    <div class="col-xs-3 mx-5">
+                                        <div class="form-group" style="display: flex; flex-direction: column">
+                                            <label class="col-form-label"
+                                                for="{{ form.optMethod.id_for_label }}">optMethod:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Please choose an optimization method">?</span>
+                                            </label>
+                                            {% if form.picked_course %}
+                                            {{ form.optMethod }}
+                                            {% else %}
+                                            <input type="text">
+                                            {% endif %}
+
                                             
                                         </div>
+                                    </div>
+
                                 </div>
-    
-                                <div class = "row">
-                                    <div class = "col-xs-3 mx-5">
+                                <hr>
+
+                                <div class="row">
+                                    <div class="col-xs-3 mx-5">
                                         <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.semesterName.id_for_label }}">semesterName:</label>      
-                                            {{ form.semesterName }}                                
+                                            <label class="col-form-label"
+                                                for="{{ form.courseContentComplexity.id_for_label }}">ContentComplexity:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Enter a value between 1.0 and 20.0 (up to 2 decimal places) for complexity.
+                                                    <br><br>
+                                                    **************************<br>
+                                                    Low complexity here means faster quality increase with more prep time:
+                                                    <br><br>
+                                                    - High ( 1 - 1.9 )
+                                                    <br>
+                                                    - Medium: ( 2 - 10 )
+                                                    <br>
+                                                    - Low ( > 10 )
+                                                    <br><br>
+                                                    
+                                                    ">?</span></label>
+
+                                                <input type="number" id="{{ form.courseContentComplexity.id_for_label }}" name="{{ form.courseContentComplexity.name }}" value="{{ form.courseContentComplexity.value }}" min="1" max="20" step="1" required>
+                                                    {% if form.courseContentComplexity.errors %}
+                                                      <ul>
+                                                        {% for error in form.courseContentComplexity.errors %}
+                                                          <li>{{ error }}</li>
+                                                        {% endfor %}
+                                                      </ul>
+                                                    {% endif %}
+
                                         </div>
                                     </div>
-    
-                                    <div class = "col-xs-3 mx-5">
+
+                                    <div class="col-xs-3 mx-5">
                                         <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.lecturer.id_for_label }}">lecturer:</label>      
-                                            {{ form.lecturer }}                                
+                                            <label class="col-form-label"
+                                                for="{{ form.courseContentFamiliarity.id_for_label }}">ContentFamiliarity:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Enter a value between 0.0 and 1.0 (up to 2 decimal places) for your familiarity with this course.
+                                                    <br><br>
+                                                    **************************<br>
+                                                    This parameter describes the lecturer's prior experience with the subject matter.
+                                                    <br><br>
+                                                    - Low experience [0.1, 0.3[
+                                                    <br>
+                                                    - Medium experience [0.3, 0.7[
+                                                    <br>
+                                                    - High experience [0.7, 1] 
+                                                    ">?</span>
+                                            </label>
+                                            <input type="number" id="{{ form.courseContentFamiliarity.id_for_label }}" name="{{ form.courseContentFamiliarity.name }}" value="{{ form.courseContentFamiliarity.value }}" min="0.1" max="1.0" step="0.01" required>
+                                            <ul>
+                                            {% if form.courseContentFamiliarity.errors %}
+                                                {% for error in form.courseContentFamiliarity.errors %}
+                                                  <li>{{ error }}</li>
+                                                {% endfor %}
+                                              </ul>
+                                            {% endif %}
                                         </div>
                                     </div>
-    
-                                    <div class = "col-xs-3 mx-5">
+
+                                    <div class="col-xs-3 mx-5">
                                         <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.optMethod.id_for_label }}">optMethod:</label>           
-                                            {{ form.optMethod }}                         
+                                            <label class="col-form-label"
+                                                for="{{ form.courseContentWeight.id_for_label }}">ContentWeight:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Enter a value between 1 and 3 for weight.
+                                                    <br><br>
+                                                    **************************<br>
+                                                    This parameter describes the lecturer's preference and measure of importance for the <strong> *Content Aspect* </strong> of this course.
+                                                    <br><br>
+                                                    - Low: 1
+                                                    <br>
+                                                    - Mid: 2
+                                                    <br>
+                                                    - High: 3 
+                                                    ">?</span>
+                                            </label>
+                                            <input type="number" id="{{ form.courseContentWeight.id_for_label }}" name="{{ form.courseContentWeight.name }}" value="{{ form.courseContentWeight.value }}" min="0" max="3.0" step="1" required>
+                                            
+                                            {% if form.courseContentWeight.errors %}
+                                                <ul>
+                                                    {% for error in form.courseContentWeight.errors %}
+                                                    <li>{{ error }}</li>
+                                                    {% endfor %}
+                                              </ul>
+                                            {% endif %}
                                         </div>
                                     </div>
-    
-                                    <div class = "col-xs-3 mx-5">
+                                </div>
+                                <hr>
+
+                                <div class="row">
+                                    <div class="col-xs-3 mx-5">
                                         <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.totalHours.id_for_label }}">totalHours:</label>
-                                            {{ form.totalHours }}
+                                            <label class="col-form-label"
+                                                for="{{ form.courseDidacticComplexity.id_for_label }}">DidacticComplexity:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Enter a value between 1.0 and 20.0 (up to 2 decimal places) for complexity.
+                                                    <br><br>
+                                                    **************************<br>
+                                                    Low complexity here means faster quality increase with more prep time:
+                                                    <br><br>
+                                                    - High ( 1 - 1.9 )
+                                                    <br>
+                                                    - Medium: ( 2 - 10 )
+                                                    <br>
+                                                    - Low ( > 10 )
+                                                    <br><br>
+
+                                                    ">?</span>
+                                            </label>
+                                            <input type="number" id="{{ form.courseDidacticComplexity.id_for_label }}" name="{{ form.courseDidacticComplexity.name }}" value="{{ form.courseDidacticComplexity.value }}" min="1" max="20" step="1" required>
+                                        
+                                            {% if form.courseDidacticComplexity.errors %}
+                                            <ul>
+                                              {% for error in form.courseDidacticComplexity.errors %}
+                                                <li>{{ error }}</li>
+                                              {% endfor %}
+                                            </ul>
+                                          {% endif %}
+
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xs-3 mx-5">
+                                        <div class="form-group" style="display: flex; flex-direction: column">
+                                                <label class="col-form-label"
+                                                    for="{{ form.courseDidacticFamiliarity.id_for_label }}">DidacticFamiliarity:
+                                                    <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                        data-placement="right"
+                                                        title="Enter a value between 0.0 and 1.0 (up to 2 decimal places) for your familiarity with this course.
+                                                        <br><br>
+                                                        **************************<br>
+                                                        This parameter describes the lecturer's prior experience with the subject matter.
+                                                        <br><br>
+                                                        - Low experience [0.1, 0.3[
+                                                        <br>
+                                                        - Medium experience [0.3, 0.7[
+                                                        <br>
+                                                        - High experience [0.7, 1] 
+                                                        <br><br>
+                                                        ">?</span>
+                                                </label>
+                                                <input type="number" id="{{ form.courseDidacticFamiliarity.id_for_label }}" name="{{ form.courseDidacticFamiliarity.name }}" value="{{ form.courseDidacticFamiliarity.value }}" min="0.1" max="1.0" step="0.01" required>
+                                            
+                                                {% if form.courseDidacticFamiliarity.errors %}
+                                                <ul>
+                                                    {% for error in form.courseDidacticFamiliarity.errors %}
+                                                    <li>{{ error }}</li>
+                                                    {% endfor %}
+                                                </ul>
+                                                {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xs-3 mx-5">
+                                        <div class="form-group" style="display: flex; flex-direction: column">
+                                            <label class="col-form-label"
+                                                for="{{ form.courseDidacticWeight.id_for_label }}">DidacticWeight:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Enter a value between 1 and 3 for weight.
+                                                    <br><br>
+                                                    **************************<br>
+                                                    This parameter describes the lecturer's preference and measure of importance for the <strong> *Didactic Aspect* </strong>  of this course.
+                                                    <br><br>
+                                                    - Low: 1
+                                                    <br>
+                                                    - Mid: 2
+                                                    <br>
+                                                    - High: 3 
+                                                    ">?</span>
+                                            </label>
+                                            <input type="number" id="{{ form.courseDidacticWeight.id_for_label }}" name="{{ form.courseDidacticWeight.name }}" value="{{ form.courseDidacticWeight.value }}" min="0" max="3.0" step="1" required>
+                                            
+                                            {% if form.courseDidacticWeight.errors %}
+                                                <ul>
+                                                    {% for error in form.courseDidacticWeight.errors %}
+                                                    <li>{{ error }}</li>
+                                                    {% endfor %}
+                                              </ul>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr>
+
+                                <div class="row">
+                                    <div class="col-xs-3 mx-5">
+                                        <div class="form-group" style="display: flex; flex-direction: column">
+                                            <label class="col-form-label"
+                                                for="{{ form.coursePresentationFinished.id_for_label }}">PresentationFinished:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Please enter a value between 0.0 and 1.0 (inclusive), with up to 2 decimal places.
+                                                    <br><br>
+                                                    **************************<br>
+                                                    Lecturer's experience with the presentation aspect before preparation:
+                                                    <br><br>
+                                                    - Low [0.1, 0.3[
+                                                    <br>
+                                                    - Medium [0.3, 0.7[
+                                                    <br>
+                                                    - High [0.7, 1] 
+                                                    <br><br>
+
+                                                    ">?</span>
+                                            </label>
+                                            <input type="number" id="{{ form.coursePresentationFinished.id_for_label }}" name="{{ form.coursePresentationFinished.name }}" value="{{ form.coursePresentationFinished.value }}" min="0.1" max="1.0" step="0.01" required>
+                                            
+                                            {% if form.coursePresentationFinished.errors %}
+                                            <ul>
+                                                {% for error in form.coursePresentationFinished.errors %}
+                                                <li>{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xs-3 mx-5">
+                                        <div class="form-group" style="display: flex; flex-direction: column">
+                                            <label class="col-form-label"
+                                                for="{{ form.coursePresentationTime0.id_for_label }}">PresentationTime0:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Please enter a value between 0.1 and 1.0 (inclusive), with up to 2 decimal places.
+                                                    <br><br>
+                                                    **************************<br>
+                                                    Turning point for relative preparation time (x).
+                                                    <br>
+                                                    Beyond this point, additional preparation offers only marginal benefits.
+                                                    
+                                                    ">?</span>
+                                            </label>
+                                            <input type="number" id="{{ form.coursePresentationTime0.id_for_label }}" name="{{ form.coursePresentationTime0.name }}" value="{{ form.coursePresentationTime0.value }}" min="0.1" max="1.0" step="0.01" required>
+                                            
+                                            {% if form.coursePresentationTime0.errors %}
+                                            <ul>
+                                                {% for error in form.coursePresentationTime0.errors %}
+                                                <li>{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <div class="col-xs-3 mx-5">
+                                        <div class="form-group" style="display: flex; flex-direction: column">
+                                            <label class="col-form-label"
+                                                for="{{ form.coursePresentationPres0.id_for_label }}">PresentationPres0:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Please enter a value between 0.1 and 1.0 (inclusive), with up to 2 decimal places.
+                                                    <br><br>
+                                                    **************************<br>
+                                                    Turning point for relative preparation quality (y).
+                                                    <br>
+                                                    Beyond this point, additional preparation offers only marginal benefits.
+                                                    ">?</span>
+                                            </label>
+                                            <input type="number" id="{{ form.coursePresentationPres0.id_for_label }}" name="{{ form.coursePresentationPres0.name }}" value="{{ form.coursePresentationPres0.value }}" min="0.1" max="1.0" step="0.01" required>
+                                            
+                                            {% if form.coursePresentationPres0.errors %}
+                                            <ul>
+                                                {% for error in form.coursePresentationPres0.errors %}
+                                                <li>{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% endif %}
                                             
                                         </div>
                                     </div>
-    
-                                </div>
-                                <hr>
-    
-                                <div class = "row">
+
                                     <div class="col-xs-3 mx-5">
                                         <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.courseContentComplexity.id_for_label }}">courseContentComplexity: </label>
-                                            {{ form.courseContentComplexity }}
+                                            <label class="col-form-label"
+                                                for="{{ form.coursePresentationComplexity.id_for_label }}">PresentationComplexity:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Please enter a value between 0.0 and 1.0 (inclusive), with up to 2 decimal places.
+                                                    <br><br>
+                                                    **************************<br>
+                                                    This parameter describes the complexity of the preparation.
+                                                    <br>
+                                                    - High ( 1 - 1.9 )
+                                                    <br>
+                                                    - Medium: ( 2 - 10 )
+                                                    <br>
+                                                    - Low ( > 10 )
+                                                    <br>
+
+                                                    ">?</span>
+                                            </label>
+                                            <input type="number" id="{{ form.coursePresentationComplexity.id_for_label }}" name="{{ form.coursePresentationComplexity.name }}" value="{{ form.coursePresentationComplexity.value }}" min="1" max="20" step="1" required>
+                                            {% if form.coursePresentationComplexity.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.coursePresentationComplexity.errors %}
+                                                    <li>{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% endif %}
+
                                         </div>
                                     </div>
-    
+
                                     <div class="col-xs-3 mx-5">
                                         <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.courseContentFamiliarity.id_for_label }}">courseContentFamiliarity: </label>
-                                            {{ form.courseContentFamiliarity }}
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr>
-    
-                                <div class = "row">
-                                    <div class="col-xs-3 mx-5">
-                                        <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.courseDidacticComplexity.id_for_label }}">courseDidacticComplexity:</label>
-                                            {{ form.courseDidacticComplexity }}
-                                        </div>
-                                    </div>
-    
-                                    <div class="col-xs-3 mx-5">
-                                        <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.courseDidacticFamiliarity.id_for_label }}">courseDidacticFamiliarity:</label>
-                                            {{ form.courseDidacticFamiliarity }}
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr>
-    
-                                <div class = "row">
-                                    <div class="col-xs-3 mx-5">
-                                        <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.coursePresentationFinished.id_for_label }}">coursePresentationFinished:</label>
-                                            {{ form.coursePresentationFinished }}
-                                        </div>
-                                    </div>
-    
-                                    <div class="col-xs-3 mx-5">
-                                        <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.coursePresentationTime0.id_for_label }}">coursePresentationTime0:</label>
-                                            {{ form.coursePresentationTime0 }}
-                                        </div>
-                                    </div>
-    
-                                    <div class="col-xs-3 mx-5">
-                                        <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.coursePresentationPres0.id_for_label }}">coursePresentationPres0:</label>
-                                            {{ form.coursePresentationPres0 }}
-                                        </div>
-                                    </div>
-    
-                                    <div class="col-xs-3 mx-5">
-                                        <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.coursePresentationComplexity.id_for_label }}">coursePresentationComplexity:</label>
-                                            {{ form.coursePresentationComplexity }}
+                                            <label class="col-form-label"
+                                                for="{{ form.coursePresentationWeight.id_for_label }}">PresentationWeight:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Enter a value between 1 and 3 for weight.
+                                                    <br><br>
+                                                    **************************<br>
+                                                    This parameter describes the lecturer's preference and measure of importance for the <strong> *Presentation Aspect* </strong> of this course.
+                                                    <br><br>
+                                                    - Low: 1
+                                                    <br>
+                                                    - Mid: 2
+                                                    <br>
+                                                    - High: 3 
+                                                    ">?</span>
+                                            </label>
+                                            <input type="number" id="{{ form.coursePresentationWeight.id_for_label }}" name="{{ form.coursePresentationWeight.name }}" value="{{ form.coursePresentationWeight.value }}" min="0" max="3.0" step="1" required>
+                                            
+                                            {% if form.coursePresentationWeight.errors %}
+                                                <ul>
+                                                    {% for error in form.coursePresentationWeight.errors %}
+                                                    <li>{{ error }}</li>
+                                                    {% endfor %}
+                                              </ul>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </div>
                                 <hr>
-    
-                                <div class = "row">
+
+                                <div class="row">
                                     <!-- Impact <br> -->
                                     <div class="col-xs-6 mx-5">
                                         <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.courseImpact.id_for_label }}">courseImpact:</label>
-                                            {{ form.courseImpact }}
+                                            <label class="col-form-label"
+                                                for="{{ form.courseImpact.id_for_label }}">Impact:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Please enter a value between 0.0 and 1.0 (inclusive), with up to 2 decimal places.
+                                                    <br><br>
+                                                    **************************<br>
+                                                    Impact factor that reflects the didactic influence on the students.
+                                                    <br><br>
+
+                                                        <li>very high (2) - early bachelor's/new topic </li>
+                                                        <li>moderate impact (1.7) - semesters 3-4 </li>
+                                                        <li>lower impact (1.5) - semester 5+</li>
+                                                        <li>minimal impact (1) - master's program/familiar area </li>
+                                                    
+                                                    ">?</span> 
+                                            </label>
+                                            <!-- {{ form.courseImpact }} -->
+                                            <input type="number" id="{{ form.courseImpact.id_for_label }}" name="{{ form.courseImpact.name }}" value="{{ form.courseImpact.value }}" min="1" max="2" step="0.1" required>
+                                            {% if form.courseImpact.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.courseImpact.errors %}
+                                                    <li>{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% endif %}
+
                                         </div>
                                     </div>
                                 </div>
                                 <hr>
-    
-                                <div class = "row">
+
+                                <div class="row">
                                     <div class="col-xs-6 mx-5">
                                         <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.courseLectTime.id_for_label }}">courseLectTime:</label>
-                                            {{ form.courseLectTime }}
+                                            <label class="col-form-label"
+                                                for="{{ form.courseLectTime.id_for_label }}">LectTime:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Please enter a value between 0.0 and 1.0 (inclusive), with up to 2 decimal places.
+                                                    <br><br>
+                                                    **************************<br>
+                                                    Number of course hours per week.
+                                                    
+                                                    ">?</span>
+                                            </label>
+                                            <input type="number" id="{{ form.courseLectTime.id_for_label }}" name="{{ form.courseLectTime.name }}" value="{{ form.courseLectTime.value }}" min="0.5" max="40" step="0.5" required>
+                                            {% if form.courseLectTime.errors %}
+                                            <ul class="errorlist">
+                                                {% for error in form.courseLectTime.errors %}
+                                                    <li>{{ error }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% endif %}
+
                                         </div>
                                     </div>
                                 </div>
                                 <hr>
-    
-                                <div class = "row">
+
+                                <div class="row">
                                     <div class="col-xs-6 mx-5">
                                         <div class="form-group" style="display: flex; flex-direction: column">
-                                            <label class="col-form-label" for="{{ form.courseStudentCount.id_for_label }}">courseStudentCount:</label>
+                                            <label class="col-form-label"
+                                                for="{{ form.courseStudentCount.id_for_label }}">StudentCount:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Please enter a value > 0.
+                                                    <br><br>
+                                                    **************************<br>
+                                                    Number of students in this course
+                                                    
+                                                    ">?</span>
+                                            </label>
+                                            {% if form.picked_course %}
                                             {{ form.courseStudentCount }}
+                                            {% else %}
+                                            <input type="number">
+                                            {% endif %}
+                                            
                                         </div>
                                     </div>
                                 </div>
                                 <hr>
-    
-    
+
+
                                 <div class="text-center">
-                                    <button onclick="addCourseForm()" type="submit" value="Submit" class="btn btn-primary mx-auto">add course</button>
-                                    <button type="submit" value="Submit" class="btn btn-dark mx-auto">Submit</button>
+                                    <button type="submit" value="Submit" class="btn btn-dark mx-auto">save course data</button>
+
+                                    <a href="{% url 'allCourseParameters' %}" class="btn btn-success">overview and computation</a>
                                 </div>
+
+
                             </form>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
+            </div>
+
+
+        </div>
     </div>
+
+    <footer class="footer">
+        <p>Content Here</p>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/jquery.validation/1.16.0/additional-methods.min.js"></script>
+
+
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+        })
+    </script>
+   
 
 </body>
 <!-- Optional JavaScript -->

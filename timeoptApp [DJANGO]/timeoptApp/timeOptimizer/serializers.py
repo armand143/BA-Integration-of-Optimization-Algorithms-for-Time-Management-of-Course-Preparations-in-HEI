@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import HEI, course, lecturer, semester, courseContent, courseDidactic, coursePresentation, courseImpact, courseLectTime, courseStudentCount, optData, optResults
+from .models import HEI, course, Lecturer, semester, courseContent, courseDidactic, coursePresentation, courseImpact, courseLectTime, courseStudentCount, optData, optResults
 
 class optDataSerializer(serializers.ModelSerializer):
     class Meta:

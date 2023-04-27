@@ -1,5 +1,10 @@
 package tf.lehroptimierung.semester;
+
+import java.util.Map;
+
 public class Course {
+
+    private Map<String, Double> weights;
 
     private AspectContent content = new AspectContent();
 
@@ -13,19 +18,19 @@ public class Course {
     Course() {
     }
 
-    // *** Setzt den Faktor für den Inhalt für einen Kurs
-    void setContent ( double familiarity, double complexity ) {
-        content.set ( familiarity, complexity );
+    // *** Setzt den Faktor fï¿½r den Inhalt fï¿½r einen Kurs
+    void setContent ( double familiarity, double complexity, double weight ) {
+        content.set ( familiarity, complexity, weight );
     }
 
-    // *** Setzt den Faktor für die Didaktik für einen Kurs
-    void setDidactic ( double familiarity, double complexity ) {
-        didactic.set ( familiarity, complexity );
+    // *** Setzt den Faktor fï¿½r die Didaktik fï¿½r einen Kurs
+    void setDidactic ( double familiarity, double complexity, double weight ) {
+        didactic.set ( familiarity, complexity, weight );
     }
 
-    // *** Setzt den Faktor für die Präsentation für einen Kurs
-    void setPresentation ( double finished, double time0, double pres0, double complexity ) {
-        presentation.set ( finished, time0, pres0, complexity );
+    // *** Setzt den Faktor fï¿½r die Prï¿½sentation fï¿½r einen Kurs
+    void setPresentation ( double finished, double time0, double pres0, double complexity, double weight ) {
+        presentation.set ( finished, time0, pres0, complexity, weight );
     }
 
     // *** Setzt den Kursnamen
@@ -33,29 +38,40 @@ public class Course {
         this.name = name;
     }
 
-    // *** Gibt den Kursnamen zurück
+    // *** Gibt den Kursnamen zurï¿½ck
     String getName() {
         return this.name;
     }
 
-    // *** Berechnet das Produkt der Werte für einen Kurs
+    // *** Berechnet das Produkt der Werte fï¿½r einen Kurs
     double calcProduct ( double timeContent, double timeDidactic, double timePresentation ) {
         return( content.calc( timeContent ) * didactic.calc( timeDidactic ) * presentation.calc( timePresentation ));
     }
 
-    // *** Berechnet die Summe der Werte für einen Kurs
+    // *** Berechnet die Summe der Werte fï¿½r einen Kurs
     double calcSum ( double timeContent, double timeDidactic, double timePresentation ) {
         return( content.calc( timeContent ) + didactic.calc( timeDidactic ) + presentation.calc( timePresentation ));
     }
 
-    // *** Berechnet die Quadratsumme der Werte für einen Kurs
+    // *** Berechnet die Quadratsumme der Werte fï¿½r einen Kurs
     double calcSqrt ( double timeContent, double timeDidactic, double timePresentation ) {
         return( Math.sqrt( content.calc( timeContent ) ) + Math.sqrt( didactic.calc( timeDidactic ) ) + Math.sqrt( presentation.calc( timePresentation ) ) );
     }
 
-    // *** Berechnet das Minimum der Werte für einen Kurs
+    // *** Berechnet das Minimum der Werte fï¿½r einen Kurs
     double calcMin ( double timeContent, double timeDidactic, double timePresentation ) {
         return( Math.min(content.calc( timeContent ), Math.min( didactic.calc( timeDidactic ) , presentation.calc( timePresentation ) ) ) );
     }
 
+    // *** Calculates the WeightedAverage
+
+    double calcWeightedAverage(double timeContent, double timeDidactic, double timePresentation) {
+        double weightedContent = content.calc(timeContent) * content.getWeight();
+        double weightedDidactic = didactic.calc(timeDidactic) * didactic.getWeight();
+        double weightedPresentation = presentation.calc(timePresentation) * presentation.getWeight();
+
+       // System.out.println(" ---------------WEIGHTS--------------------" + content.getWeight() + " " + didactic.getWeight() + " " + presentation.getWeight());
+
+        return weightedContent + weightedDidactic + weightedPresentation;
+    }
 }

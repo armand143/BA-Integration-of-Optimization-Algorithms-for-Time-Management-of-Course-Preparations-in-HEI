@@ -94,6 +94,11 @@ public class SemOpti_Local {
                         resultOld = semester.calcMin(timesOld);
                         break;
 
+                    case "weightedAverage":
+                        result = semester.calcWeightedAverage(times);
+                        resultOld = semester.calcWeightedAverage(timesOld);
+                        break;
+
                     default:
                         System.err.println("Error: No valid optimization method!");
                         break;
@@ -164,6 +169,11 @@ public class SemOpti_Local {
                     case "min":
                         result = semester.calcMin(times);
                         resultOld = semester.calcMin(timesOld);
+                        break;
+
+                    case "weightedAverage":
+                        result = semester.calcWeightedAverage(times);
+                        resultOld = semester.calcWeightedAverage(timesOld);
                         break;
 
                     default:
@@ -238,6 +248,11 @@ public class SemOpti_Local {
                         resultOld = semester.calcMin(timesOld);
                         break;
 
+                    case "weightedAverage":
+                        result = semester.calcWeightedAverage(times);
+                        resultOld = semester.calcWeightedAverage(timesOld);
+                        break;
+
                     default:
                         System.err.println("Error: No valid optimization method!");
                         break;
@@ -308,6 +323,11 @@ public class SemOpti_Local {
                     case "min":
                         result = semester.calcMin(times);
                         resultOld = semester.calcMin(timesOld);
+                        break;
+
+                    case "weightedAverage":
+                        result = semester.calcWeightedAverage(times);
+                        resultOld = semester.calcWeightedAverage(timesOld);
                         break;
 
                     default:
@@ -381,6 +401,11 @@ public class SemOpti_Local {
                         resultOld = semester.calcMin(timesOld);
                         break;
 
+                    case "weightedAverage":
+                        result = semester.calcWeightedAverage(times);
+                        resultOld = semester.calcWeightedAverage(timesOld);
+                        break;
+
                     default:
                         System.err.println("Error: No valid optimization method!");
                         break;
@@ -450,6 +475,11 @@ public class SemOpti_Local {
                     case "min":
                         result = semester.calcMin(times);
                         resultOld = semester.calcMin(timesOld);
+                        break;
+
+                    case "weightedAverage":
+                        result = semester.calcWeightedAverage(times);
+                        resultOld = semester.calcWeightedAverage(timesOld);
                         break;
 
                     default:

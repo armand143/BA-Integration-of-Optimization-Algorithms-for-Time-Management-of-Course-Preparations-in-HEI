@@ -9,6 +9,6 @@
 .Then run "python manage.py migrate"
 .Go to Django's admin site (create a superUser before)
 .To see the models created in your app, you will have to import all models in the admin.py file then register the models using " admin.site.register([list, of , models, you, imported]) "
-.Changing the database configs(to using PostGreSql...if necessary)-> Copy from older django Projects OR Look on Intenet
+.Changing the database configs(to using PostGreSql...if necessary)-> Copy from older django Projects OR Look on Internet
 .Note: Import errors like " Import 'rest_framework.views' could not be resolved" are often solved when you choose a new Interpreter ie navigate to the virtual env you using then go to Script and you choose 'python' as your Interpreter (Then probemm should be solved)
-
+.NOTE when updating the models.py file, you'll have to populate new fields you create or the ones you alter, solution: delete everything in migration folder of project's app except the __init__.py file, then delete the database and run the migrations.

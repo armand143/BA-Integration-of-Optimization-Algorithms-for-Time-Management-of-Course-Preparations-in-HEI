@@ -77,6 +77,10 @@ public class SemOpti_Random {
                     result = semester.calcMin(times);
                     break;
 
+                case "weightedAverage":
+                    result = semester.calcWeightedAverage(times);
+                    break;
+
                 default:
                     System.err.println("Error: No valid optimization method!");
                     break;
