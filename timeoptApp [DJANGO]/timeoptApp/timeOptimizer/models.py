@@ -105,7 +105,6 @@ class optData(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     edited_at = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=50, default='default_value')
-    #picked_course = models.ManyToManyField(course, null = True, blank=True)
 
     def __str__(self):
         return  "/" + self.semesterName + "/" + self.optMethod + "/" + str(self.lecturer)

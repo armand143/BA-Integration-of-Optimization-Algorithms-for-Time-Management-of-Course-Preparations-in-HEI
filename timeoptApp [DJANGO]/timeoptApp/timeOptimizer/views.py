@@ -15,6 +15,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib import messages
+from django.urls import reverse
 
 from django.contrib.auth.decorators import login_required
 
@@ -27,6 +28,9 @@ import copy
 import os
 from django.conf import settings
 from PIL import Image
+
+import asyncio
+import aiohttp
 
 #page with all optimization data(course configurations entered by lecturers)
 def home(request):
@@ -163,6 +167,35 @@ def register_view(request):
     return render(request, 'registration/registration.html', {'form': form})
     
 
+
+# async def make_request(session, url, json_obj):
+#     headers = {'Content-type': 'application/json'}
+#     async with session.post(url, json=json_obj, headers=headers) as response:
+#         if response.status == 200:
+#             display_response = await response.json()
+#             optimization_results_json = {}
+
+#             for (k, v) in display_response['courses'].items():
+#                 # process the response here
+
+# async def main():
+#     async with aiohttp.ClientSession() as session:
+#         tasks = []
+#         for opt_obj in list_of_optData_dups:
+#             serializer = optDataSerializer(opt_obj)
+#             json_obj = serializer.data
+
+#             corresponding_optresults = optResults.objects.filter(optDataObj=opt_obj)[0]
+
+#             url = 'http://localhost:8080/api/optimize'
+#             task = asyncio.create_task(make_request(session, url, json_obj))
+#             tasks.append(task)
+
+#         await asyncio.gather(*tasks)
+
+# asyncio.run(main())
+
+
 #this get's the opt_data's id and sends to spring boot api for optimization calculations (also creates the corresponding opt_results)
 def optimizerWebService(request, optDataID):
 
@@ -171,8 +204,8 @@ def optimizerWebService(request, optDataID):
     optData_ready = optData.objects.get(id = optDataID)
 
     #test if optData_ready already has an optMethod:
-    if optData_ready.optMethod == "":
-        messages.error(request, "please select an optimization method ") 
+    if optData_ready.optMethod == "" or len(optData_ready.courses) == 0:
+        messages.error(request, "please set optimization method & courses correctly ") 
         return redirect ('allCourseParameters')
     else:
 
@@ -301,7 +334,8 @@ def createOptData(request):
                                             totalHours = currentLecturer.time_available,
                                             optMethod = "",
                                             courses = {},
-                                            lecturer = currentLecturer,)
+                                            lecturer = currentLecturer,
+                                            status = "*")
         print(obj.pk)
 
         form = optDataForm(initial={'semesterName': currentLecturer.picked_semester, 'totalHours': currentLecturer.time_available, 'lecturer': currentLecturer})
@@ -334,12 +368,15 @@ def createOptData(request):
         obj_opt_results.save()     
         print("this is the new pk: " + str(obj_opt_results.pk))  
 
-        current_optData = optData.objects.filter(lecturer = currentLecturer).last()
-        context = {'current_optData': current_optData,
-                'form': form,
-                #    'form': optDataForm(),
-        }
-        return render(request, 'optData.html', context)
+        # current_optData = optData.objects.filter(lecturer = currentLecturer).last()
+        # context = {'current_optData': current_optData,
+        #         'form': form,
+
+        # }
+        # return render(request, 'optData.html', context)
+
+        return redirect(reverse('editCourse', args = [obj.pk, next(iter(obj.courses))]))
+        # return editCourse(request, obj.pk, next(iter(obj.courses)))
 
 
 
@@ -462,52 +499,18 @@ def addCourseParameter(request, id):
 
 
 def allCourseParameters(request):
-    display_filtered_optData = []
-    optiResults = []
-
     currentLecturer = request.user.lecturer_profile
 
     #eliminate duplicates created during optimization:
-    optData_list = optData.objects.filter(lecturer = currentLecturer).order_by('-edited_at')
-    optData_list_no_dups = []
+    optData_list = optData.objects.filter(lecturer = currentLecturer)
+    optData_list_no_dups = [obj for obj in optData_list if obj.status == "*"]
+    optiResults = [obj.opt_results for obj in optData_list_no_dups]
 
-    for opt_obj in optData_list: 
-        dups = optData.objects.filter(lecturer=currentLecturer, courses=opt_obj.courses).exclude(pk=opt_obj.pk).order_by('-edited_at')
-
-        if not dups.exists():
-
-            optData_list_no_dups.append(opt_obj)
-            display_filtered_optData += optData_list_no_dups
-            optiResults += optResults.objects.filter(optDataObj__in = display_filtered_optData)
-
-        else: 
-            # get oldest optData to know which was created first, hence making the others be the latest/copies
-            oldest_optData = optData.objects.filter(lecturer=currentLecturer, courses=opt_obj.courses).order_by('-created_at')[0]
-
-            dups = optData.objects.filter(lecturer=currentLecturer, courses=opt_obj.courses).exclude(pk = oldest_optData.pk)
-
-            display_filtered_optData += [obj for obj in optData_list if obj not in dups]
-            optiResults += optResults.objects.filter(optDataObj__in = display_filtered_optData)
-
-    context = {'all_params': set(display_filtered_optData), 
+    context = {'all_params': set(optData_list_no_dups), 
                 'all_results_serializer': set(optiResults),
                 # 'dups': dups,
                 }
     return render(request, 'optimizationPage.html', context)
-
-# else:
-#     messages.error(request, 'no optimization data yet ') 
-#     return render(request, 'optimizationPage.html', {})    
-
-    # if optiData: 
-    #     optiData = optData.objects.filter(lecturer = currentLecturer).order_by('-edited_at')
-    #     optiResults = optResults.objects.filter(optDataObj__in = optiData)  #.order_by('-created_at')
-    #     context = {'all_params': optiData, 
-    #                'all_results_serializer': optiResults}
-    #     return render(request, 'optimizationPage.html', context)
-    # else:
-    #     messages.error(request, 'no optimization data yet ') 
-    #     return render(request, 'optimizationPage.html', {})    
 
 
 
@@ -564,18 +567,7 @@ def editCourse(request, optData_id, key):
 
             current_optData.optMethod = str(form.cleaned_data['optMethod'])
             print("debug test" + str(current_optData.optMethod))
-
-            if json.dumps(old_current_optData) == json.dumps(current_optData.courses):
-
-                print("The two JSON objects are the same")
-
-            else:
-                current_optData.opt_results.status = "update results for applied changes"
-                current_optData.opt_results.save()
-
-                print("The two JSON objects are different")
-    
-            current_optData.picked_course = None
+            
 
             # we normalize the weights of the different course aspects
             sumOfWeights = form.cleaned_data['courseContentWeight'] + form.cleaned_data['courseDidacticWeight'] + form.cleaned_data['coursePresentationWeight']
@@ -590,13 +582,31 @@ def editCourse(request, optData_id, key):
 
             current_optData.save()
 
+            # testing if changes were applied
+            if json.dumps(old_current_optData) == json.dumps(current_optData.courses):
 
-            #update courses for all in dups_list then save:
+                print("The two JSON objects are the same")
+
+            else:
+                # current_optData's corresponding opt_results status changes to signal changes in a course parameter 
+                current_optData.opt_results.status = "update results for applied changes"
+                current_optData.opt_results.save()
+
+                print("The two JSON objects are different")
+
+
+            #update optData for all objects in dups_list and the status of corresponding optResults too then save:
+            # watch out for order in which optData and it's results are updated 
             for obj in dups_list:
                 obj.courses = current_optData.courses
                 obj.save()
+                obj.opt_results.status = "update results for applied changes"
+                obj.opt_results.save()
+                
 
-            messages.success(request, "successfully updated! ")
+            messages.success(request, str(current_optData.picked_course) + " successfully updated! ")
+
+            current_optData.picked_course = None
 
             context = {'all_params': optData.objects.filter(lecturer = currentLecturer),
                        'current_optData': current_optData,
@@ -659,23 +669,40 @@ def editCourse(request, optData_id, key):
         
 
 def delete_optCourse(request, optData_id, key):
-
     print(key)
     print(optData_id)
-    # currentLecturer = request.user.lecturer_profile
 
+    currentLecturer = request.user.lecturer_profile
     current_optData = optData.objects.get(id = optData_id)
+    dups_list = optData.objects.filter(lecturer = currentLecturer, courses = current_optData.courses)
+    print(dups_list)
+
+    #deletes course from both optData, it's dups, it's opt_results and those of dups too
+    for obj in dups_list:
+        print("before", obj.courses)
+        del obj.courses[key]
+
+        obj.save()
+        print("after", obj.courses)
+
+
+        #if opt_results exist
+        if key in obj.opt_results.optimizationResults:
+            try:
+                del obj.opt_results.optimizationResults[key]
+                obj.opt_results.save()
+            except KeyError:
+                pass
+
+    current_optData = optData.objects.get(id=optData_id)
+    print('deleeeeeeeeeeeetion ', current_optData.courses )
+    # return redirect(reverse('editCourse', args = [current_optData.pk, next(iter(current_optData.courses))]))
 
     current_form = optDataForm(instance=current_optData)
 
-    del current_optData.courses[key]
-    current_optData.save()
-
-    print(current_optData.courses)
-
     context = {'form': current_form, 
-               'current_optData': current_optData,
-               }
+            'current_optData': current_optData,
+            }
     return render(request, 'optData.html', context ) 
 
     
