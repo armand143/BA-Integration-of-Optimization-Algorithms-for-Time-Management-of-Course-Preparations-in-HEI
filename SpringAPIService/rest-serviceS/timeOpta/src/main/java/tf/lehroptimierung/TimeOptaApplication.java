@@ -256,11 +256,11 @@ public class TimeOptaApplication {
             JSONObject everycourse = new JSONObject();
 
             DecimalFormat df = new DecimalFormat("#.##");
-            everycourse.put("Hours for presentation" , df.format(times.getTimePresentation(i) * stundensumme)+" hrs");
+            everycourse.put("Hours for presentation" , df.format(times.getTimePresentation(i) * stundensumme));
             everycourse.put("Presentation percentage" , df.format(times.getTimePresentation(i) * 100)+" %");
-            everycourse.put("Hours for didactics" , df.format( times.getTimeDidactic(i) * stundensumme )+" hrs");
+            everycourse.put("Hours for didactics" , df.format( times.getTimeDidactic(i) * stundensumme ));
             everycourse.put("Didactic percentage" , df.format( times.getTimeDidactic(i) * 100)+" %");
-            everycourse.put("Hours for scientific content" , df.format( times.getTimeContent(i) * stundensumme )+" hrs");
+            everycourse.put("Hours for scientific content" , df.format( times.getTimeContent(i) * stundensumme ));
             everycourse.put("Scientific content percentage" , df.format(times.getTimeContent(i) * 100)+" %");
             everycourse.put("Course name", semOpti.getCourseName(i));
 
