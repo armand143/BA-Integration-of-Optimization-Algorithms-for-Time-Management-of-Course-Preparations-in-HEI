@@ -128,6 +128,7 @@ class optResults(models.Model):
         optimalValue = models.FloatField(default=0.0)
         # lecturer = models.ForeignKey(lecturer, on_delete=models.CASCADE)
         optimizationResults = models.JSONField()
+        evaluation_metrics = models.JSONField(default={})
         optDataObj = models.OneToOneField(optData, on_delete=models.CASCADE, related_name='opt_results', default=1)
         created_at = models.DateTimeField(auto_now_add=True)
         edited_at = models.DateTimeField(auto_now=True)

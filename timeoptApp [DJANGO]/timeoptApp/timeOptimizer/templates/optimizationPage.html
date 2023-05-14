@@ -103,9 +103,11 @@
                                         {% now "d-m-Y" as today %}
                                         <div style="font-style: italic; font-size: small; color: grey;">
                                             {% if obj.created_at|date:"d-m-Y" == today %}
-                                            today at {{ obj.created_at|date:"h:i a" }}
+                                                today at {{ obj.created_at|date:"h:i a" }}
+                                            {% elif obj.edited_at > obj.created_at %}
+                                                last update: {{obj.edited_at}} <br>
                                             {% else %}
-                                            {{obj.created_at}}
+                                                created at: {{obj.created_at}} <br>
                                             {% endif %}
                                         </div>
 
@@ -176,12 +178,17 @@
                                             <strong>{{k}}</strong> <br>
                                             {% for k1,v1 in v.items %}
 
-                                                {% if "percentage" in k1 %}
+                                                {% if k1 != 'course_metrics' %}
+                                                
+                                                    {% if "percentage" in k1 %}
                                                     {{k1}} : <span style="color: blue;"> {{v1}} </span>
-                                                {% else %}
-                                                    {{k1}} : {{v1}}
+                                                    {% else %}
+                                                        {{k1}} : {{v1}}
+                                                    {% endif %}
+                                                    <br>
+
                                                 {% endif %}
-                                                <br>
+
                                             {% endfor %}
 
                                             <hr>

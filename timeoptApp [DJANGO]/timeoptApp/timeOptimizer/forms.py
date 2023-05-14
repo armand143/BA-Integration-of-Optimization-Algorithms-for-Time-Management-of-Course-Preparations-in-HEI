@@ -92,6 +92,8 @@ class courseForm(forms.ModelForm):
      
 
 class optDataForm(forms.ModelForm):
+        courseEstTime = forms.DecimalField(decimal_places=1, min_value=Decimal('1.0'), widget=forms.TextInput(attrs={'class': 'form-control'}))
+
         courseContentComplexity = forms.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(20)], widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number', 'step': '0.01', 'min': '1.0', 'max': '20.0'}))
         courseContentFamiliarity = forms.DecimalField(max_digits=5, decimal_places=2, min_value=Decimal('0.0'), max_value=Decimal('1.0'), widget=forms.TextInput(attrs={'class': 'form-control'}))
         courseContentWeight = forms.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(3)], widget=forms.TextInput(attrs={'class': 'form-control', 'type': 'number', 'step': '1', 'min': '1.0', 'max': '3.0'}))

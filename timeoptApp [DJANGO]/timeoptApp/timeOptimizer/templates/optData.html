@@ -82,16 +82,44 @@
 
                 {% if current_optData.courses|length > 0 %}
                 {% for course,course_content in current_optData.courses.items %}
-                <ul>
-                    <li>
-                        <a href="{% url 'editCourse' optData_id=current_optData.id key=course %}">
-                            {{course}}
-                        </a>
 
-                        <a href="{% url 'delete_optCourse' optData_id=current_optData.id key=course %}"
+
+                    <div class = "row col-12">
+                        <div class = "col-7">
+                            <a href="{% url 'editCourse' optData_id=current_optData.id key=course %}">
+                                {{course}}
+                            </a>
+                        </div>
+
+                        <div class = col-2>
+                            <a href="{% url 'delete_optCourse' optData_id=current_optData.id key=course %}"
                             class="btn-sm btn-danger"> x </a>
-                    </li>
-                </ul>
+                        </div>
+
+                        <div class = "col-3" style="color: green">
+                            {% if course_content.courseEstTime.expectedAllocation %}
+                                {{course_content.courseEstTime.expectedAllocation }} h
+                            {% else %}
+                                
+                            {% endif %}
+                        </div>
+                        
+                    </div>
+                    <hr>
+                
+                    <!-- <div class="d-flex justify-content-between align-items-center"> 
+                        <ul>
+                            <li>
+                                <a href="{% url 'editCourse' optData_id=current_optData.id key=course %}">
+                                    {{course}}
+                                </a>
+        
+                                <a href="{% url 'delete_optCourse' optData_id=current_optData.id key=course %}"
+                                    class="btn-sm btn-danger "> x </a>
+                            </li>
+                        </ul>
+                    </div> -->
+
                 {% endfor %}
 
 
@@ -204,7 +232,24 @@
                                             <input type="text">
                                             {% endif %}
 
-                                            
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-xs-3 mx-5" style="color: green;">
+                                        <div class="form-group" style="display: flex; flex-direction: column">
+                                            <label class="col-form-label"
+                                                for="{{ form.courseEstTime.id_for_label }}">Est. Time allocation:
+                                                <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
+                                                    data-placement="right"
+                                                    title="Expected Time Allocation <br>
+                                                    **************************<br>
+                                                    How much time do you estimate will be necessary for the preparation of this course <br>
+
+                                                    **************************<br>
+                                                    Please keep in mind the sum of your estimations shouldn't exceed {{ request.user.lecturer_profile.time_available }} hrs">?</span>
+                                            </label>
+                                            <input type="number" id="{{ form.courseEstTime.id_for_label }}" name="{{ form.courseEstTime.name }}" value="{{ form.courseEstTime.value }}" min="1" max="{{ request.user.lecturer_profile.time_available }}" step="0.1" required>
                                         </div>
                                     </div>
 
@@ -302,6 +347,7 @@
                                             {% endif %}
                                         </div>
                                     </div>
+                                    
                                 </div>
                                 <hr>
 

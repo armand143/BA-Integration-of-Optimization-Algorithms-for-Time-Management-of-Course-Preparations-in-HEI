@@ -32,6 +32,16 @@ from PIL import Image
 import asyncio
 import aiohttp
 
+import statistics
+
+import matplotlib.pyplot as plt
+import io
+import base64
+from urllib.parse import quote
+
+import random
+
+
 #page with all optimization data(course configurations entered by lecturers)
 def home(request):
     optiData = optData.objects.all()
@@ -169,6 +179,9 @@ def register_view(request):
 
 
 # async def make_request(session, url, json_obj):
+
+#     corresponding_optresults = optResults.objects.filter(optDataObj=opt_obj)[0]
+
 #     headers = {'Content-type': 'application/json'}
 #     async with session.post(url, json=json_obj, headers=headers) as response:
 #         if response.status == 200:
@@ -177,23 +190,23 @@ def register_view(request):
 
 #             for (k, v) in display_response['courses'].items():
 #                 # process the response here
+#                     optimization_results_dic = {}
+#                     optimization_results_dic[str(v['Course name'])] =  { 'Scientific content percentage' : v['Scientific content percentage'], 
+#                                                                         'Hours for scientific content': v['Hours for scientific content'],
+#                                                                         'Didactic percentage': v['Didactic percentage'],
+#                                                                         'Hours for didactics': v['Hours for didactics'],
+#                                                                         'Presentation percentage': v['Presentation percentage'],
+#                                                                         'Hours for presentation': v['Hours for presentation']
+#                     }
+#                     optimization_results_json.update(optimization_results_dic)
 
-# async def main():
+
+
+# async def optimize_async(url, headers, json_obj):
 #     async with aiohttp.ClientSession() as session:
-#         tasks = []
-#         for opt_obj in list_of_optData_dups:
-#             serializer = optDataSerializer(opt_obj)
-#             json_obj = serializer.data
-
-#             corresponding_optresults = optResults.objects.filter(optDataObj=opt_obj)[0]
-
-#             url = 'http://localhost:8080/api/optimize'
-#             task = asyncio.create_task(make_request(session, url, json_obj))
-#             tasks.append(task)
-
-#         await asyncio.gather(*tasks)
-
-# asyncio.run(main())
+#         async with session.post(url, json=json_obj, headers=headers) as response:
+#             response_json = await response.json()
+#             return response_json
 
 
 #this get's the opt_data's id and sends to spring boot api for optimization calculations (also creates the corresponding opt_results)
@@ -301,13 +314,21 @@ def optimizerWebService(request, optDataID):
                         else:
                             opt_data.opt_results.update_status = ""
                             opt_data.opt_results.save()
-                corresponding_optresults.save()          
+
+                corresponding_optresults.optMethod = opt_obj.optMethod
+                corresponding_optresults.save()   
+                print("most recent results", corresponding_optresults.optMethod)
+
 
             else:
                 # Handle the error
                 pass
 
                 return HttpResponse("Something went wrong!")
+            
+
+
+        
 
         return redirect('allCourseParameters')
 
@@ -341,7 +362,9 @@ def createOptData(request):
         form = optDataForm(initial={'semesterName': currentLecturer.picked_semester, 'totalHours': currentLecturer.time_available, 'lecturer': currentLecturer})
 
         data = {}
-        course_config = {'courseContent': {'CourseComplexity': 0.0, 'CourseFamiliarity': 0.0, 'contentWeight': 1.0, 'norm_contentWeight': 1.0},
+        course_config = {   
+                            'courseEstTime': {'expectedAllocation': 0.0},
+                            'courseContent': {'CourseComplexity': 0.0, 'CourseFamiliarity': 0.0, 'contentWeight': 1.0, 'norm_contentWeight': 1.0},
                             'courseDidactic': {'CourseComplexity': 0.0, 'CourseFamiliarity': 0.0, 'didacticWeight': 1.0, 'norm_didacticWeight': 1.0},
                             'coursePresentation': {'finished': 0.0, 'time0': 0.0, 'pres0': 0.0, 'complexity': 0.0, 'presentationWeight': 1.0, 'norm_presentationWeight': 1.0},
                             'courseImpact': {'d': 0.0},
@@ -358,12 +381,14 @@ def createOptData(request):
         print(obj.pk)
 
         # create it's corresponding opt_results 
-        obj_opt_results = optResults.objects.create(semesterName = obj.semesterName,
-                                totalHours = obj.totalHours,
-                                optMethod = obj.optMethod,
-                                optimalValue = 0.0, 
-                                optimizationResults = {}, 
-                                optDataObj = obj)
+        obj_opt_results = optResults.objects.create(
+                                                    semesterName = obj.semesterName,
+                                                    totalHours = obj.totalHours,
+                                                    optMethod = obj.optMethod,
+                                                    optimalValue = 0.0, 
+                                                    optimizationResults = {}, 
+                                                    optDataObj = obj
+                                                    )
         
         obj_opt_results.save()     
         print("this is the new pk: " + str(obj_opt_results.pk))  
@@ -545,11 +570,20 @@ def editCourse(request, optData_id, key):
     dups_list = list(optData.objects.filter(lecturer = currentLecturer, courses = current_optData.courses).exclude(id = optData_id))
     print("list of dups w/o the current Optdata ", dups_list)
 
+    # #Checking if total of estimated time allocations entered exceeds total hours available:
+    # sum_of_estTime = 0
+    # for (course, course_content) in current_optData.courses:
+    #     sum_of_estTime += course_content['courseEstTime']['expectedAllocation']
+
+    # if sum_of_estTime > current_optData.totalHours:
+    #     messages.error(request, "please make sure the sum of estimated Allocations don't exceed the total number of hours available for preparation of all courses ")
+        
 
     if request.method == 'POST':
         
         form = optDataForm(request.POST)
         if form.is_valid() and current_optData.picked_course is not None:
+            current_course['courseEstTime']['expectedAllocation'] = str(form.cleaned_data['courseEstTime'])
             current_course['courseContent']['CourseComplexity'] = str(form.cleaned_data['courseContentComplexity'])
             current_course['courseContent']['CourseFamiliarity'] = str(form.cleaned_data['courseContentFamiliarity'])
             current_course['courseContent']['contentWeight'] = str(form.cleaned_data['courseContentWeight'])
@@ -616,6 +650,7 @@ def editCourse(request, optData_id, key):
 
             messages.error(request, "please select a course on the left then fill the form correctly")
 
+            current_form.fields['courseEstTime'].initial = current_course['courseEstTime']['expectedAllocation']
             current_form.fields['courseContentComplexity'].initial = current_course['courseContent']['CourseComplexity']
             current_form.fields['courseContentFamiliarity'].initial = current_course['courseContent']['CourseFamiliarity']
             current_form.fields['courseContentWeight'].initial = current_course['courseContent']['contentWeight']
@@ -646,6 +681,7 @@ def editCourse(request, optData_id, key):
     
     else: 
         # current_form.fields['picked_course'].initial = course.objects.get(course_name = key)
+        current_form.fields['courseEstTime'].initial = current_course['courseEstTime']['expectedAllocation']
         current_form.fields['courseContentComplexity'].initial = current_course['courseContent']['CourseComplexity']
         current_form.fields['courseContentFamiliarity'].initial = current_course['courseContent']['CourseFamiliarity']
         current_form.fields['courseContentWeight'].initial = current_course['courseContent']['contentWeight']
@@ -743,11 +779,54 @@ def optimizationOverview(request, optData_id):
     currentLecturer = request.user.lecturer_profile
 
     try:
-        current_optData = optData.objects.filter(id = optData_id)[0]
+        current_optData = optData.objects.get(id = optData_id)
+
+        # print(current_optData.optMethod)
         optData_list_curr_user = optData.objects.filter(lecturer = currentLecturer)
         dups = [obj for obj in optData_list_curr_user if obj.courses == current_optData.courses ]
 
+        # for obj in dups:
+        #     print(obj.optMethod)
+
+        results_dups = [obj.opt_results for obj in dups]
+
+        for obj in results_dups:
+            print("here ", obj.evaluation_metrics)
+
+
+        #Do the evaluation at this level
+        eval(dups)
+        #get the plots
+        # image_string = plot_metrics(results_dups)
+
+        mad_image_string, mpd_image_string, std_image_string = plot_metrics(results_dups)
+
+        names = [obj.optMethod for obj in results_dups]
+        mads = [round(obj.evaluation_metrics.get("mad"), 2) for obj in results_dups]
+        mpds = [round(obj.evaluation_metrics.get("mpd"),2) for obj in results_dups]
+        std_devs = [round(obj.evaluation_metrics.get("std_dev"),2) for obj in results_dups]
+
+        best_mad_method = names[mads.index(min(mads))]
+        best_mpd_method = names[mpds.index(min(mpds))]
+        best_std_method = names[std_devs.index(min(std_devs))]
+
+        mad_text = f"The MAD plot shows the average absolute deviation from the target values for each optimization method. The method '{best_mad_method}' performed the best with the lowest MAD of {min(mads)}. Lower values indicate better performance."
+
+        mpd_text = f"The MPD plot shows the average deviation as a percentage of the target values for each optimization method. The method '{best_mpd_method}' had the lowest MPD of {min(mpds)}, indicating the best performance in percentage terms."
+
+        std_text = f"The Standard Deviation (STD) plot shows the variability or spread in the deviation values for each optimization method. The method '{best_std_method}' had the lowest STD of {min(std_devs)}, indicating the most consistent performance across different runs."
+
+
         context = { "all_dups": dups,
+                   
+                   "mad_image_string": mad_image_string, 
+                   "mpd_image_string": mpd_image_string,
+                   "std_image_string": std_image_string,
+
+                   "mad_text": mad_text,
+                   "mpd_text": mpd_text,
+                   "std_text": std_text
+
         }
 
         return render(request, 'optimizationWrap.html', context)
@@ -823,3 +902,227 @@ def checkDups(request, optData_id):
             return False
     else:
         return False
+
+
+
+def eval(dups_list):
+    # results_list = [obj.opt_results for obj in dups_list]
+
+    eval_metrics = {
+                    "mad" : 0.0,
+                    "mpd" : 0.0,
+                    "std_dev" : 0.0,
+                    }
+    
+    course_metrics = {  
+                        "courseEstTime": 0.0,
+                        "abs_diff" : 0.0,
+                        "perc_diff" : 0.0,
+                        "calcTime": 0.0,
+                    }    
+
+    estTime = 0.0
+    calcTime = 0.0
+
+    for obj in dups_list:
+
+        abs_diff = 0.0
+        perc_diff = 0 
+
+        abs_diffs = []
+        perc_diffs = []
+
+        sum_abs_diff = 0.0
+        sum_perc_diff = 0.0
+        counter = 0
+
+        res_obj = optResults.objects.filter(optDataObj = obj)[0]
+
+        mine_mad = 0.0
+        mine_mpd = 0.0
+
+        for course, course_data in obj.courses.items():
+
+            counter += 1
+
+            estTime = course_data["courseEstTime"]["expectedAllocation"]
+            #curr_course = obj.courses[course]
+
+            for res_course, res_course_data in res_obj.optimizationResults.items():
+                if res_course == course: 
+
+                    print("DEBUG " + "check if courses are same for both optData and results" + "course: " + str(course) +  "res_course: " + str(res_course))
+
+                    #assign metrics for evaluation:
+                    res_course_data["course_metrics"] = course_metrics
+
+                    content_hrs = res_course_data["Hours for scientific content"]
+                    didactic_hrs = res_course_data["Hours for didactics"]
+                    presentation_hrs = res_course_data["Hours for presentation"]
+
+                    calcTime = float(content_hrs) + float(didactic_hrs) + float(presentation_hrs)
+
+                    abs_diff = abs(float(estTime) - calcTime)
+
+                    if float(estTime) != 0.0: #when expected time allocation is not entered by user when filling out the course parameter form
+                        perc_diff = abs_diff / float(estTime) * 100
+                    else: 
+                        perc_diff = 0.0
+
+                    res_course_data["course_metrics"]["courseEstTime"] = estTime
+                    res_course_data["course_metrics"]["calcTime"] = calcTime
+                    res_course_data["course_metrics"]["abs_diff"] = abs_diff
+                    res_course_data["course_metrics"]["perc_diff"] = perc_diff
+
+                    abs_diffs.append(abs_diff)
+                    perc_diffs.append(perc_diff)
+
+                else:
+                    pass
+                
+                sum_abs_diff += abs_diff
+                sum_perc_diff += perc_diff
+
+                mine_mpd = sum_perc_diff / counter
+                mine_mad = sum_abs_diff / counter
+
+        print("my MAD: " + str(mine_mad))
+        print("my MPD: " + str(mine_mpd))
+
+        #at the end of the loop looping over all courses for an optimization method i.e. for a optData
+        mad = statistics.mean(abs_diffs)
+        mpd = statistics.mean(perc_diffs)
+        std_dev = statistics.pstdev(abs_diffs)
+
+        print("MAD: " + str(mad))
+        print("MPD: " + str(mpd))
+        print("std_dev: " + str(std_dev))
+
+        eval_metrics['mad'] = mad
+        eval_metrics['mpd'] = mpd
+        eval_metrics['std_dev'] = std_dev
+
+        print("eval_metrics: ", eval_metrics)
+
+        res_obj.evaluation_metrics = eval_metrics
+        #res_obj_origin = optResults.objects.get(id = res_obj.pk)
+        res_obj.save()
+
+        # res_obj_origin.evaluation_metrics = res_obj.evaluation_metrics
+        #res_obj_origin.save()
+
+        #print("res_obj_origin's eval metrics: ", res_obj_origin.evaluation_metrics)
+
+
+        print("res_obj's eval metrics: ", res_obj.evaluation_metrics)
+        obj.save()
+
+
+
+
+# def plot_metrics(optimization_res):
+#     # Extract metrics
+
+#     for obj in optimization_res:
+#         print(obj.evaluation_metrics)
+
+#     names = [obj.optMethod for obj in optimization_res]
+#     mads = [round(obj.evaluation_metrics.get("mad"), 2) for obj in optimization_res]
+#     mpds = [round(obj.evaluation_metrics.get("mpd"),2) for obj in optimization_res]
+#     std_devs = [round(obj.evaluation_metrics.get("std_dev"),2) for obj in optimization_res]
+
+#     print("names ", names)
+#     print("mads ",mads)
+#     print("mpds ",mpds)
+#     print("std ",std_devs)
+
+#     fig, axs = plt.subplots(3, figsize=(8,13)) # create 6 subplots
+
+#     # Plot MAD metrics
+#     axs[0].bar(names, mads)
+#     axs[0].set_title('Mean Absolute Deviation (MAD)')
+#     # axs[0, 0].text(0.5, 0.5, 'This is a text', horizontalalignment='center', verticalalignment='center', transform=axs[0, 0].transAxes)    # axs[0, 1].boxplot(mads, vert=False, labels=names)
+#     # axs[0, 1].set_title('Mean Absolute Deviation (MAD) - Box Plot')
+
+#     # Plot MPD metrics
+#     axs[1].bar(names, mpds)
+#     axs[1].set_title('Mean Percentage Deviation (MPD)')
+#     # axs[1, 1].boxplot(mpds, vert=False, labels=names)
+#     # axs[1, 1].set_title('Mean Percentage Deviation (MPD) - Box Plot')
+
+#     # Plot Standard Deviation metrics
+#     axs[2].bar(names, std_devs)
+#     axs[2].set_title('Standard Deviation')
+#     # axs[2, 1].boxplot(std_devs, vert=False, labels=names)
+#     # axs[2, 1].set_title('Standard Deviation - Box Plot')
+
+#     fig.tight_layout(pad=5.0) # Add padding for better layout
+
+#     # Save it to a bytes buffer.
+#     bytes_image = io.BytesIO()
+#     plt.savefig(bytes_image, format='png')
+#     bytes_image.seek(0)
+#     encoded_string = base64.b64encode(bytes_image.read())
+#     return quote(encoded_string)
+
+
+def plot_metrics(optimization_res):
+
+    # Extract metrics
+
+    for obj in optimization_res:
+        print(obj.evaluation_metrics)
+
+    names = [obj.optMethod for obj in optimization_res]
+    mads = [round(obj.evaluation_metrics.get("mad"), 2) for obj in optimization_res]
+    mpds = [round(obj.evaluation_metrics.get("mpd"),2) for obj in optimization_res]
+    std_devs = [round(obj.evaluation_metrics.get("std_dev"),2) for obj in optimization_res]
+
+    print("names ", names)
+    print("mads ",mads)
+    print("mpds ",mpds)
+    print("std ",std_devs)
+
+    # fig, axs = plt.subplots(3, figsize=(8,13)) # create 6 subplots
+
+    # Plotting MAD
+    fig1, ax1 = plt.subplots(figsize=(5,5))
+    ax1.bar(names, mads)
+    ax1.set_title('Mean Absolute Deviation (MAD)')
+    plt.xticks(rotation=10)  # Rotate x labels
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    mad_plot_url = base64.b64encode(img.getvalue()).decode()
+    plt.close(fig1)
+
+    # Plotting MPD
+    fig2, ax2 = plt.subplots(figsize=(5,5))
+    ax2.bar(names, mpds)
+    ax2.set_title('Mean Percentage Deviation (MPD)')
+    plt.xticks(rotation=10)  # Rotate x labels
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    mpd_plot_url = base64.b64encode(img.getvalue()).decode()
+    plt.close(fig2)
+
+    # Plotting STD
+    fig3, ax3 = plt.subplots(figsize=(5,5))
+    ax3.bar(names, std_devs)
+    ax3.set_title('Standard Deviation (STD)')
+    plt.xticks(rotation=10)  # Rotate x labels
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    std_plot_url = base64.b64encode(img.getvalue()).decode()
+    plt.close(fig3)
+
+
+    return mad_plot_url, mpd_plot_url, std_plot_url
+
+
+
+def generate_course_data(request, optData_id):
+    current_optData = optData.objects.get(id = optData_id)
+    

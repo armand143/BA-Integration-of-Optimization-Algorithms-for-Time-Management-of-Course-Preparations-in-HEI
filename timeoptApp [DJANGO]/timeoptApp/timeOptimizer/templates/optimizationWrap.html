@@ -98,51 +98,58 @@
 
                                                         {% for k,v in res.items %}
 
-                                                            {% if obj.optMethod == 'product' %}
+                                                            {% if k != 'course_metrics' %}
 
-                                                                {% if "percentage" in k %}
-                                                                    {{k}} : <span style="color: blue;"> {{v}} </span>
-                                                                {% else %}
-                                                                    {{k}} : {{v}}
-                                                                {% endif %}
-                                                                <br>
+                                                                {% if obj.optMethod == 'product' %}
 
-                                                            {% elif obj.optMethod == 'sqrt' %}
+                                                                    {% if "percentage" in k %}
+                                                                        {{k}} : <span style="color: blue;"> {{v}} </span>
+                                                                    {% else %}
+                                                                        {{k}} : {{v}}
+                                                                    {% endif %}
+                                                                    <br>
 
-                                                            {% if "percentage" in k %}
-                                                                {{k}} : <span style="color: blue;"> {{v}} </span>
-                                                            {% else %}
-                                                                {{k}} : {{v}}
+                                                                {% elif obj.optMethod == 'sqrt' %}
+
+                                                                    {% if "percentage" in k %}
+                                                                        {{k}} : <span style="color: blue;"> {{v}} </span>
+                                                                    {% else %}
+                                                                        {{k}} : {{v}}
+                                                                    {% endif %}
+                                                                    <br>
+
+                                                                {% elif obj.optMethod == 'sum' %}
+
+                                                                    {% if "percentage" in k %}
+                                                                        {{k}} : <span style="color: blue;"> {{v}} </span>
+                                                                    {% else %}
+                                                                        {{k}} : {{v}}
+                                                                    {% endif %}
+                                                                    <br>
+
+                                                                {% elif obj.optMethod == 'min' %}
+
+                                                                    {% if "percentage" in k %}
+                                                                        {{k}} : <span style="color: blue;"> {{v}} </span>
+                                                                    {% else %}
+                                                                        {{k}} : {{v}}
+                                                                    {% endif %}
+                                                                    <br>
+
+                                                                {% elif obj.optMethod == 'weightedAverage' %}
+
+                                                                    {% if "percentage" in k %}
+                                                                        {{k}} : <span style="color: blue;"> {{v}} </span>
+                                                                    {% else %}
+                                                                        {{k}} : {{v}}
+                                                                    {% endif %}
+                                                                    <br>
+                                                                    {% endif %}
+
+
+
                                                             {% endif %}
-                                                            <br>
 
-                                                            {% elif obj.optMethod == 'sum' %}
-
-                                                            {% if "percentage" in k %}
-                                                                {{k}} : <span style="color: blue;"> {{v}} </span>
-                                                            {% else %}
-                                                                {{k}} : {{v}}
-                                                            {% endif %}
-                                                            <br>
-
-                                                            {% elif obj.optMethod == 'min' %}
-
-                                                            {% if "percentage" in k %}
-                                                                {{k}} : <span style="color: blue;"> {{v}} </span>
-                                                            {% else %}
-                                                                {{k}} : {{v}}
-                                                            {% endif %}
-                                                            <br>
-
-                                                            {% elif obj.optMethod == 'weightedAverage' %}
-
-                                                            {% if "percentage" in k %}
-                                                                {{k}} : <span style="color: blue;"> {{v}} </span>
-                                                            {% else %}
-                                                                {{k}} : {{v}}
-                                                            {% endif %}
-                                                            <br>
-                                                            {% endif %}
                                                         {% endfor %}
                                                         <hr>
                                                     {% endfor %}
@@ -161,6 +168,31 @@
     
                 </div>
             </div>
+
+            <div class="row content-area">
+                <div class="col-6">
+                    <!-- <h5>Mean Absolute Deviation (MAD)</h5> -->
+                    <img src="data:image/png;base64,{{ mad_image_string }}">
+                    <p style="color: green;">{{ mad_text }}</p>
+                </div>
+            
+                <div class="col-6">
+                    <!-- <h5>Mean Percentage Deviation (MPD)</h5> -->
+                    <img src="data:image/png;base64,{{ mpd_image_string }}">
+
+                    <p style="color: green;">{{ mpd_text }}</p>
+                </div>
+            </div>
+
+            <div class = "row content-area">
+                <div class="col-6">
+                    <!-- <h5>Standard Deviation (STD_DEV) </h5> -->
+                    <img src="data:image/png;base64,{{ std_image_string }}">
+                    <br>
+                    <p style="color: green;">{{ std_text }}</p>
+                </div>
+            </div>
+
     
         </div>
     </div>
@@ -191,7 +223,7 @@
     
 
 
-    <footer class="footer"style= "position: fixed; ">
+    <footer class="footer"style= "position: relative; ">
         <p>Content Here</p>
     </footer>
     
