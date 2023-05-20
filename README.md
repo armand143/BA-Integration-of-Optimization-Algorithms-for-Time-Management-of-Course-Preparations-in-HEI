@@ -102,11 +102,7 @@ If you would like to contribute to this project, please follow these steps:
 License
 This project is licensed under the MIT License.
 Acknowledgements
-
-    -
-    -
-    -
-    - The Django and Spring Boot communities for their extensive documentation and support
+    - Prof Fuhrmann for providing the roots of this Project. Credits go to him for the time allocation algorithm that's been used here.   
 
 Support
-If you encounter any issues or have questions, please open an issue on the GitHub repository or contact the project maintainers.
+If you encounter any issues or have questions, please open an issue on the GitHub repository.
