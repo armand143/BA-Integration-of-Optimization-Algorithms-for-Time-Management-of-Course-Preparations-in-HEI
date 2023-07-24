@@ -1,4 +1,4 @@
-# BA-timeOptimizer-DJango-SpringBoot
+# BA-Integration-of-Optimization-Algorithms-for-Time-Management-of-Course-Preparations-in-HEI 
 
 #Thesis Project: Integration of Optimization Algorithms for Time Management of Course Preparations in Higher Education
 
