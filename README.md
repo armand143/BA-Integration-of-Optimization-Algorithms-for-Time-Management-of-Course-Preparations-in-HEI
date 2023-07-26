@@ -50,8 +50,7 @@ pip install -r requirements.txt
 Navigate to the Django project directory:
 cd timeoptApp [DJANGO]/timeoptApp
 
-
-## Setting up the Spring Boot backend
+## Setting up the Django web application Setting up the Spring Boot backend
 Navigate to the Spring Boot project directory:
 cd SpringAPIService/rest-serviceS/timeOpta
 
