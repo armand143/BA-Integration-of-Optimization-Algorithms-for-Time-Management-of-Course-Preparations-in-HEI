@@ -50,27 +50,27 @@ pip install -r requirements.txt
 Navigate to the Django project directory:
 cd timeoptApp [DJANGO]/timeoptApp
 
-##Setting up the Spring Boot backend
+## Setting up the Spring Boot backend
 Navigate to the Spring Boot project directory:
 cd SpringAPIService/rest-serviceS/timeOpta
 
 Build the Spring Boot application using Maven:
 mvn clean install
 
-##Usage
-###Running the Django web application
+## Usage
+### Running the Django web application
 
 Start the Django development server:
 python manage.py runserver
 
-###Running the Spring Boot backend
+### Running the Spring Boot backend
 In a separate terminal, navigate to the Spring Boot project directory:
 cd SpringAPIService/rest-serviceS/timeOpta
 
 Run the Spring Boot application:
 mvn spring-boot:run
 
-##Accessing the application
+## Accessing the application
 
 Open your web browser and navigate to the Django web application:
 http://127.0.0.1:8000/
@@ -80,14 +80,6 @@ On the next page, enter course parameter information in the provided form, along
 Click the 'Overview' button to see a summary of all completed optimization runs. On the next page, run the optimization process (click 'Optimize') to obtain the time allocation results.
 Review the results by clicking on 'Summary'. This will display the results of all optimization strategies along with an evaluation done using Mean Absolute Deviation (MAD) and Standard Deviation (STD) metrics.
 
-#Contributing
-If you would like to contribute to this project, please follow these steps:
-
-    Fork the repository
-    Create a new branch (git checkout -b your-feature-branch)
-    Commit your changes (git commit -am 'Add some feature')
-    Push to the branch (git push origin your-feature-branch)
-    Create a new pull request
     
 #License
 This project is licensed under the MIT License.
