@@ -79,7 +79,7 @@ class Lecturer(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='lecturer_profile')
     picked_semester = models.ManyToManyField(semester, blank=True)
     time_available = models.DecimalField(max_digits=5, decimal_places=2, default=0)
-    profile_picture = models.ImageField(upload_to="profile_pics", default= "default_pro_pic.jpg")
+    # profile_picture = models.ImageField(upload_to="profile_pics", default= "default_pro_pic.jpg")
     lecturer_email = models.CharField(max_length=250, default="foobar@jetmail.com")
     
     def __str__(self):

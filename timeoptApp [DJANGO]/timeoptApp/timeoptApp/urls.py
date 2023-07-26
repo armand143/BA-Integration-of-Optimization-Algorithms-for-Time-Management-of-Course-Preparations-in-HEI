@@ -20,8 +20,9 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('timeOptimizer.urls')),
+    path('', include('timeOptimizer.urls')),   #'timeOptimizer' is the namespace for the URLs that are included from 'timeOptimizer.urls'
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

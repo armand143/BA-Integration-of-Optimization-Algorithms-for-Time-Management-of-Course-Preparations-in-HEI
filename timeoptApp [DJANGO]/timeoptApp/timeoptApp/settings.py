@@ -54,6 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'timeoptApp.middleware.CatchPageNotFoundErrorMiddleware', 
 ]
 
 ROOT_URLCONF = 'timeoptApp.urls'
@@ -151,3 +152,5 @@ AUTHENTICATION_BACKENDS = [
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+LOGIN_URL = 'timeOptimizer/login_view/'

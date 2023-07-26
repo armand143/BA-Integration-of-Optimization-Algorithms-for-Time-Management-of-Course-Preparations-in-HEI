@@ -88,7 +88,7 @@ def login_view(request):
         form = LoginForm()
         return render(request, "registration/login.html", {"form": form})
     
-
+@login_required
 def profile_view(request):
         
         currentUser = request.user
@@ -783,7 +783,8 @@ def delete_optCourse(request, optData_id, key):
     context = {'form': current_form, 
             'current_optData': current_optData,
             }
-    return render(request, 'optData.html', context ) 
+    # return render(request, 'optData.html', context )
+    return redirect(reverse('editCourse', args = [current_optData.pk, next(iter(current_optData.courses))]))
 
     
 
@@ -823,9 +824,8 @@ def optimizationOverview(request, optData_id):
     currentLecturer = request.user.lecturer_profile
 
     try:
+
         current_optData = optData.objects.get(id = optData_id)
-
-
 
         # print(current_optData.optMethod)
         optData_list_curr_user = optData.objects.filter(lecturer = currentLecturer)
@@ -842,45 +842,89 @@ def optimizationOverview(request, optData_id):
             # obj.save()
             print("here ", obj.evaluation_metrics)
 
+        
+        if len(results_dups) is not 5:
+            messages.error(request, "Please wait for all results")
+            return redirect('allCourseParameters')
+        
+        else:
+            #Do the evaluation at this level
+            eval(dups)
 
-        #Do the evaluation at this level
-        eval(dups)
+            #get the plots
+            mad_image_html, mpd_image_html, std_image_html = plot_metrics(results_dups)
 
-        #get the plots
-        mad_image_html, mpd_image_html, std_image_html = plot_metrics(results_dups)
+            names = [obj.optMethod for obj in results_dups]
+            # mads = [round(obj.evaluation_metrics.get("mad"), 2) for obj in results_dups]
+            # mpds = [round(obj.evaluation_metrics.get("mpd"),2) for obj in results_dups]
+            # std_devs = [round(obj.evaluation_metrics.get("std_dev"),2) for obj in results_dups]
 
-        names = [obj.optMethod for obj in results_dups]
-        mads = [round(obj.evaluation_metrics.get("mad"), 2) for obj in results_dups]
-        mpds = [round(obj.evaluation_metrics.get("mpd"),2) for obj in results_dups]
-        std_devs = [round(obj.evaluation_metrics.get("std_dev"),2) for obj in results_dups]
+            mads = []
+            mpds = []
+            std_devs = []
 
-        best_mad_method = names[mads.index(min(mads))]
-        best_mpd_method = names[mpds.index(min(mpds))]
-        best_std_method = names[std_devs.index(min(std_devs))]
+            for obj in results_dups:
+                mad = obj.evaluation_metrics.get("mad")
+                mpd = obj.evaluation_metrics.get("mpd")
+                std_dev = obj.evaluation_metrics.get("std_dev")
+                
+                if mad is not None:
+                    mads.append(round(mad, 2))
+                if mpd is not None:
+                    mpds.append(round(mpd, 2))
+                if std_dev is not None:
+                    std_devs.append(round(std_dev, 2))
 
-        mad_text = f"The MAD plot shows the average absolute deviation from the target values for each optimization method. The method '{best_mad_method}' performed the best with the lowest MAD of {min(mads)}. Lower values indicate better performance."
-
-        mpd_text = f"The MPD plot shows the average deviation as a percentage of the target values for each optimization method. The method '{best_mpd_method}' had the lowest MPD of {min(mpds)}, indicating the best performance in percentage terms."
-
-        std_text = f"The Standard Deviation (STD) plot shows the variability or spread in the deviation values for each optimization method. The method '{best_std_method}' had the lowest STD of {min(std_devs)}, indicating the most consistent performance across different runs."
+            # best_mad_method = names[mads.index(min(mads))]
+            # best_mpd_method = names[mpds.index(min(mpds))]
+            # best_std_method = names[std_devs.index(min(std_devs))]
 
 
-        context = { 
-                    "current_optData": current_optData,
+            if mads:  # Checks if mads is not empty
+                min_mad = min(mads)
+                best_mad_method = names[mads.index(min_mad)]
+            else:
+                min_mad = None
+                best_mad_method = "mad"  # or "No data available", or whatever makes sense
 
-                    "all_dups": dups,
-                   
-                   "mad_image_html": mad_image_html, 
-                   "mpd_image_html": mpd_image_html,
-                   "std_image_html": std_image_html,
+            if mpds:
+                min_mpd = min(mpds)
+                best_mpd_method = names[mpds.index(min_mpd)]
+            else:
+                min_mpd = None
+                best_mpd_method = "mpd"  # or "No data available", or whatever makes sense
 
-                   "mad_text": mad_text,
-                   "mpd_text": mpd_text,
-                   "std_text": std_text
+            if std_devs:
+                min_std_dev = min(std_devs)
+                best_std_method = names[std_devs.index(min_std_dev)]
+            else:
+                min_std_dev = None
+                best_std_method = "std_dev"  # or "No data available", or whatever makes sense
 
-        }
 
-        return render(request, 'optimizationWrap.html', context)
+            mad_text = f"The MAD plot shows the average absolute deviation from the target values for each optimization method. The method '{best_mad_method}' performed the best with the lowest MAD of {min_mad}. Lower values indicate better performance."
+
+            mpd_text = f"The MPD plot shows the average deviation as a percentage of the target values for each optimization method. The method '{best_mpd_method}' had the lowest MPD of {min_mpd}, indicating the best performance in percentage terms."
+
+            std_text = f"The Standard Deviation (STD) plot shows the variability or spread in the deviation values for each optimization method. The method '{best_std_method}' had the lowest STD of {min_std_dev}, indicating the most consistent performance across different runs."
+
+
+            context = { 
+                        "current_optData": current_optData,
+
+                        "all_dups": dups,
+                    
+                    "mad_image_html": mad_image_html, 
+                    "mpd_image_html": mpd_image_html,
+                    "std_image_html": std_image_html,
+
+                    "mad_text": mad_text,
+                    "mpd_text": mpd_text,
+                    "std_text": std_text
+
+            }
+
+            return render(request, 'optimizationWrap.html', context)
     
     except IndexError:
 
@@ -1077,9 +1121,25 @@ def plot_metrics(optimization_res):
         print(obj.evaluation_metrics)
 
     names = [obj.optMethod for obj in optimization_res]
-    mads = [round(obj.evaluation_metrics.get("mad"), 2) for obj in optimization_res]
-    mpds = [round(obj.evaluation_metrics.get("mpd"),2) for obj in optimization_res]
-    std_devs = [round(obj.evaluation_metrics.get("std_dev"),2) for obj in optimization_res]
+    # mads = [round(obj.evaluation_metrics.get("mad"), 2) for obj in optimization_res]
+    # mpds = [round(obj.evaluation_metrics.get("mpd"),2) for obj in optimization_res]
+    # std_devs = [round(obj.evaluation_metrics.get("std_dev"),2) for obj in optimization_res]
+
+    mads = []
+    mpds = []
+    std_devs = []
+
+    for obj in optimization_res:
+        mad = obj.evaluation_metrics.get("mad")
+        mpd = obj.evaluation_metrics.get("mpd")
+        std_dev = obj.evaluation_metrics.get("std_dev")
+        
+        if mad is not None:
+            mads.append(round(mad, 2))
+        if mpd is not None:
+            mpds.append(round(mpd, 2))
+        if std_dev is not None:
+            std_devs.append(round(std_dev, 2))
 
     print("names ", names)
     print("mads ",mads)

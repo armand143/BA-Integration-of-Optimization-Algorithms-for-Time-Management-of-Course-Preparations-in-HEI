@@ -1,6 +1,8 @@
 from . import views
 from django.urls import path
 
+# app_name = 'timeOptimizer'
+
 urlpatterns = [
     path('', views.register_view, name='home'),
     #path('createCourse/', views.createCourse , name='createCourse'),
