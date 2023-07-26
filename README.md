@@ -50,12 +50,14 @@ pip install -r requirements.txt
 Navigate to the Django project directory:
 cd timeoptApp [DJANGO]/timeoptApp
 
+
 ## Setting up the Spring Boot backend
 Navigate to the Spring Boot project directory:
 cd SpringAPIService/rest-serviceS/timeOpta
 
 Build the Spring Boot application using Maven:
 mvn clean install
+
 
 ## Usage
 ### Running the Django web application
@@ -69,6 +71,7 @@ cd SpringAPIService/rest-serviceS/timeOpta
 
 Run the Spring Boot application:
 mvn spring-boot:run
+
 
 ## Accessing the application
 
@@ -84,10 +87,12 @@ Review the results by clicking on 'Summary'. This will display the results of al
 #License
 This project is licensed under the MIT License.
 
+
 #Acknowledgements
 
 - Prof. Fuhrmann for providing the roots of this Project. Credits go to him for the time allocation algorithm that's been used here. 
 - My Advisor Patrick Herbke for his valuable feedback. 
+
 
 #Support
 If you encounter any issues or have questions, please open an issue on the GitHub repository.
