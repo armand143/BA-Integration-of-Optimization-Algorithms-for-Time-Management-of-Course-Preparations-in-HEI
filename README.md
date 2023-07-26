@@ -82,7 +82,7 @@ http://127.0.0.1:8000/
 
 Create a new user and log in. Once logged in, you'll be directed to the Profile Page, where you can update your profile information, select already available courses or create new ones, and start the optimization process by clicking on the big green button below.
 On the next page, enter course parameter information in the provided form, along with an estimate of the time you think will be sufficient for each course. Tooltips are available on hover to provide more insight into each parameter.
-Click the 'Overview' button to see a summary of all completed optimization runs. On the next page, run the optimization process (click 'Optimize') to obtain the time allocation results.
+Click the 'Overview' button to summarize all completed optimization runs. On the next page, run the optimization process (click 'Optimize') to obtain the time allocation results.
 Review the results by clicking on 'Summary'. This will display the results of all optimization strategies along with an evaluation done using Mean Absolute Deviation (MAD) and Standard Deviation (STD) metrics.
 
     
@@ -94,7 +94,7 @@ This project is licensed under the MIT License.
 #Acknowledgements
 
 - Prof. Fuhrmann for providing the roots of this Project. Credits go to him for the time allocation algorithm that's been used here. 
-- My Advisor Patrick Herbke for his valuable feedback. 
+- My Advisor, Patrick Herbke, for his valuable feedback. 
 
 
 #Support
