@@ -2,7 +2,7 @@ from . import views
 from django.urls import path
 
 urlpatterns = [
-    path('', views.home, name='home'),
+    path('', views.register_view, name='home'),
     #path('createCourse/', views.createCourse , name='createCourse'),
     path('createOptData/', views.createOptData, name= 'createOptData'),
     path('allCourseParameters/', views.allCourseParameters, name='allCourseParameters'),
@@ -21,6 +21,11 @@ urlpatterns = [
     path('addCourse/<int:cour_id>/', views.addCourse, name = 'addCourse'),
     path('optimizationOverview/<int:optData_id>/', views.optimizationOverview, name = 'optimizationOverview'),
     path('editCourseDetail/<int:course_id>/', views.editCourseDetail, name = 'editCourseDetail'),
+    path('generate_course_data/<int:optData_id>/', views.generate_course_data, name = 'generate_course_data'),
+    path('overviewButton/<int:optData_id>/', views.overviewButton, name = 'overviewButton'),
+    path('generate_weights/<int:optData_id>/<str:weight_type>/', views.generate_weights, name='generate_weights'),
+    path('clone_optData/<int:optData_id>/', views.clone_optData, name='clone_optData'),
+    path('eval_profile/<int:optData_id>/<str:profile>/', views.eval_profile, name='eval_profile'),
 
 
 

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 import requests
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
@@ -41,12 +41,17 @@ from urllib.parse import quote
 
 import random
 
+from decimal import Decimal
 
-#page with all optimization data(course configurations entered by lecturers)
-def home(request):
-    optiData = optData.objects.all()
-    serializer = optDataSerializer(optiData, many=True)
-    return JsonResponse({'optimizationDataConfigs': serializer.data}, safe=False)
+import plotly.graph_objects as go
+import plotly.io as pio
+
+# #page with all optimization data(course configurations entered by lecturers)
+# def home(request):
+#     optiData = optData.objects.all()
+#     serializer = optDataSerializer(optiData, many=True)
+#     return JsonResponse({'optimizationDataConfigs': serializer.data}, safe=False)
+
 
 # @login_required
 def login_view(request):
@@ -156,6 +161,14 @@ def profile_view(request):
                     currentLecturer.save()
 
                     updateLecturerForm.save()
+
+                    #update also the lecturer_name attribute of each course:
+                    list_of_lecturers_courses = currentLecturer.courseOffered.all()
+                    for cour in list_of_lecturers_courses:
+                        cour.lecturer_name = currentLecturer.lecturer_name
+                        cour.save()
+                    
+                    messages.success(request, "Profile successfully updated")
                     return redirect('profile_view')
 
                 else:
@@ -249,7 +262,10 @@ def optimizerWebService(request, optDataID):
                                                             optMethod = method,
                                                             courses = optData_ready.courses,
                                                             lecturer = optData_ready.lecturer,
-                                                            picked_course = None
+                                                            picked_course = None,
+                                                            lecturer_category = optData_ready.lecturer_category,
+                                                            weight_category = optData_ready.weight_category,
+                                                            clone = optData_ready.clone,
                                                             
                                                         ) 
                     new_optData.save()
@@ -267,11 +283,13 @@ def optimizerWebService(request, optDataID):
         list_of_optData_dups = list(optData.objects.filter(lecturer = current_lecturer, courses = optData_ready.courses))
         print(list_of_optData_dups)
 
+        # Setting status of all optResults of currentlecturer to empty string, so at end of optimization only the most recent opt result has a status "(new)"
+        # list_of_optResults = 
+
         all_optDatas_lecturer = optData.objects.filter(lecturer = current_lecturer)
         filtered_list_no_dups = [obj for obj in all_optDatas_lecturer if obj not in list_of_optData_dups]
 
         # For evaluation we compute the optimization for the same data but different optMethods in a loop: 
-
         for opt_obj in list_of_optData_dups:
             serializer = optDataSerializer(opt_obj)
             json_obj = serializer.data
@@ -307,14 +325,16 @@ def optimizerWebService(request, optDataID):
                 # #after optimization computation, the main optData is added back to list that'll be displayed:
                 # filtered_list_no_dups.append(optData_ready)
 
-                #update status to signal results ready
-                for opt_data in filtered_list_no_dups:
-                        if opt_data.opt_results == corresponding_optresults:
-                            corresponding_optresults.update_status = "(new)"
-                        else:
-                            opt_data.opt_results.update_status = ""
-                            opt_data.opt_results.save()
+                # #update status to signal results ready
+                # for opt_data in filtered_list_no_dups:
+                #         if opt_data.opt_results == corresponding_optresults:
+                #             corresponding_optresults.update_status = "(new)"
+                #             corresponding_optresults.save()
+                #         else:
+                #             opt_data.opt_results.update_status = ""
+                #             opt_data.opt_results.save()
 
+                corresponding_optresults.update_status = "(new)"
                 corresponding_optresults.optMethod = opt_obj.optMethod
                 corresponding_optresults.save()   
                 print("most recent results", corresponding_optresults.optMethod)
@@ -325,10 +345,12 @@ def optimizerWebService(request, optDataID):
                 pass
 
                 return HttpResponse("Something went wrong!")
-            
 
 
-        
+        #update status to signal results ready
+        for opt_data in filtered_list_no_dups:
+            opt_data.opt_results.update_status = ""
+            opt_data.opt_results.save()
 
         return redirect('allCourseParameters')
 
@@ -356,6 +378,7 @@ def createOptData(request):
                                             optMethod = "",
                                             courses = {},
                                             lecturer = currentLecturer,
+                                            lecturer_category = 'Novice',
                                             status = "*")
         print(obj.pk)
 
@@ -537,6 +560,15 @@ def allCourseParameters(request):
                 }
     return render(request, 'optimizationPage.html', context)
 
+def overviewButton(request, optData_id):
+    current_optData = optData.objects.get(id = optData_id)
+    hours_left = checkExpectedTime(current_optData.pk)
+
+    if hours_left == 0: 
+        return redirect('allCourseParameters')
+    else: 
+        messages.error(request, "Please make sure the sum of your expected Time estimation for all courses is equal to the availability time you provided on your profile page: " + str(current_optData.totalHours) + "hrs")
+        return redirect(reverse('editCourse', args = [current_optData.pk, next(iter(current_optData.courses))]))
 
 
 def updateForm(request):
@@ -567,17 +599,8 @@ def editCourse(request, optData_id, key):
     old_current_optData = copy.deepcopy(current_optData.courses) 
 
     #We find the dups and update them too: 
-    dups_list = list(optData.objects.filter(lecturer = currentLecturer, courses = current_optData.courses).exclude(id = optData_id))
-    print("list of dups w/o the current Optdata ", dups_list)
-
-    # #Checking if total of estimated time allocations entered exceeds total hours available:
-    # sum_of_estTime = 0
-    # for (course, course_content) in current_optData.courses:
-    #     sum_of_estTime += course_content['courseEstTime']['expectedAllocation']
-
-    # if sum_of_estTime > current_optData.totalHours:
-    #     messages.error(request, "please make sure the sum of estimated Allocations don't exceed the total number of hours available for preparation of all courses ")
-        
+    dups_list = list(optData.objects.filter(lecturer = currentLecturer, courses = current_optData.courses, clone = current_optData.clone).exclude(id = optData_id))
+    print("list of dups w/o the current Optdata ", dups_list)        
 
     if request.method == 'POST':
         
@@ -623,7 +646,7 @@ def editCourse(request, optData_id, key):
 
             else:
                 # current_optData's corresponding opt_results status changes to signal changes in a course parameter 
-                current_optData.opt_results.status = "update results for applied changes"
+                current_optData.opt_results.update_status = "update results for applied changes"
                 current_optData.opt_results.save()
 
                 print("The two JSON objects are different")
@@ -634,7 +657,7 @@ def editCourse(request, optData_id, key):
             for obj in dups_list:
                 obj.courses = current_optData.courses
                 obj.save()
-                obj.opt_results.status = "update results for applied changes"
+                obj.opt_results.update_status = "update results for applied changes"
                 obj.opt_results.save()
                 
 
@@ -642,8 +665,12 @@ def editCourse(request, optData_id, key):
 
             current_optData.picked_course = None
 
+            hours_left = checkExpectedTime(optData_id)
+
+
             context = {'all_params': optData.objects.filter(lecturer = currentLecturer),
                        'current_optData': current_optData,
+                       'hours_left': hours_left,
                        }
             return render(request, 'optData.html', context)
         else: 
@@ -669,9 +696,12 @@ def editCourse(request, optData_id, key):
             #In case form didn't submit properly:
             current_optData.picked_course = None
 
+            hours_left = checkExpectedTime(optData_id)
+
             context = {'form': current_form, 
                         'current_optData': current_optData,
                         'form_errors': form.errors,
+                        'hours_left': hours_left
             }
 
             print(form.errors.as_data())
@@ -697,12 +727,26 @@ def editCourse(request, optData_id, key):
         current_form.fields['courseLectTime'].initial = current_course['courseLectTime']['d']
         current_form.fields['courseStudentCount'].initial = current_course['courseStudentCount']['students']
 
+    hours_left = checkExpectedTime(optData_id)
 
     context = {'form': current_form, 
                'current_optData': current_optData,
+               'hours_left': hours_left
                }
     return render(request, 'optData.html', context ) 
-        
+
+
+
+def checkExpectedTime(optData_id):
+    current_optData = optData.objects.get(id = optData_id)
+
+    sum_expected_time = 0
+    for course, course_data in current_optData.courses.items():
+        sum_expected_time += Decimal(course_data['courseEstTime']['expectedAllocation'])
+    
+    hours_left = current_optData.totalHours - sum_expected_time
+    return hours_left
+
 
 def delete_optCourse(request, optData_id, key):
     print(key)
@@ -781,25 +825,29 @@ def optimizationOverview(request, optData_id):
     try:
         current_optData = optData.objects.get(id = optData_id)
 
+
+
         # print(current_optData.optMethod)
         optData_list_curr_user = optData.objects.filter(lecturer = currentLecturer)
         dups = [obj for obj in optData_list_curr_user if obj.courses == current_optData.courses ]
 
         # for obj in dups:
-        #     print(obj.optMethod)
+        #     obj.lecturer_category = '#'
+        #     obj.save()
 
         results_dups = [obj.opt_results for obj in dups]
 
         for obj in results_dups:
+            # obj.lecturer_category = '#'
+            # obj.save()
             print("here ", obj.evaluation_metrics)
 
 
         #Do the evaluation at this level
         eval(dups)
-        #get the plots
-        # image_string = plot_metrics(results_dups)
 
-        mad_image_string, mpd_image_string, std_image_string = plot_metrics(results_dups)
+        #get the plots
+        mad_image_html, mpd_image_html, std_image_html = plot_metrics(results_dups)
 
         names = [obj.optMethod for obj in results_dups]
         mads = [round(obj.evaluation_metrics.get("mad"), 2) for obj in results_dups]
@@ -817,11 +865,14 @@ def optimizationOverview(request, optData_id):
         std_text = f"The Standard Deviation (STD) plot shows the variability or spread in the deviation values for each optimization method. The method '{best_std_method}' had the lowest STD of {min(std_devs)}, indicating the most consistent performance across different runs."
 
 
-        context = { "all_dups": dups,
+        context = { 
+                    "current_optData": current_optData,
+
+                    "all_dups": dups,
                    
-                   "mad_image_string": mad_image_string, 
-                   "mpd_image_string": mpd_image_string,
-                   "std_image_string": std_image_string,
+                   "mad_image_html": mad_image_html, 
+                   "mpd_image_html": mpd_image_html,
+                   "std_image_html": std_image_html,
 
                    "mad_text": mad_text,
                    "mpd_text": mpd_text,
@@ -960,6 +1011,8 @@ def eval(dups_list):
                     didactic_hrs = res_course_data["Hours for didactics"]
                     presentation_hrs = res_course_data["Hours for presentation"]
 
+                    print(content_hrs,didactic_hrs, presentation_hrs)
+
                     calcTime = float(content_hrs) + float(didactic_hrs) + float(presentation_hrs)
 
                     abs_diff = abs(float(estTime) - calcTime)
@@ -990,6 +1043,8 @@ def eval(dups_list):
         print("my MPD: " + str(mine_mpd))
 
         #at the end of the loop looping over all courses for an optimization method i.e. for a optData
+
+        print("DEBUG see abs_diffs:: " , abs_diffs)
         mad = statistics.mean(abs_diffs)
         mpd = statistics.mean(perc_diffs)
         std_dev = statistics.pstdev(abs_diffs)
@@ -1005,13 +1060,8 @@ def eval(dups_list):
         print("eval_metrics: ", eval_metrics)
 
         res_obj.evaluation_metrics = eval_metrics
-        #res_obj_origin = optResults.objects.get(id = res_obj.pk)
+
         res_obj.save()
-
-        # res_obj_origin.evaluation_metrics = res_obj.evaluation_metrics
-        #res_obj_origin.save()
-
-        #print("res_obj_origin's eval metrics: ", res_obj_origin.evaluation_metrics)
 
 
         print("res_obj's eval metrics: ", res_obj.evaluation_metrics)
@@ -1020,56 +1070,9 @@ def eval(dups_list):
 
 
 
-# def plot_metrics(optimization_res):
-#     # Extract metrics
-
-#     for obj in optimization_res:
-#         print(obj.evaluation_metrics)
-
-#     names = [obj.optMethod for obj in optimization_res]
-#     mads = [round(obj.evaluation_metrics.get("mad"), 2) for obj in optimization_res]
-#     mpds = [round(obj.evaluation_metrics.get("mpd"),2) for obj in optimization_res]
-#     std_devs = [round(obj.evaluation_metrics.get("std_dev"),2) for obj in optimization_res]
-
-#     print("names ", names)
-#     print("mads ",mads)
-#     print("mpds ",mpds)
-#     print("std ",std_devs)
-
-#     fig, axs = plt.subplots(3, figsize=(8,13)) # create 6 subplots
-
-#     # Plot MAD metrics
-#     axs[0].bar(names, mads)
-#     axs[0].set_title('Mean Absolute Deviation (MAD)')
-#     # axs[0, 0].text(0.5, 0.5, 'This is a text', horizontalalignment='center', verticalalignment='center', transform=axs[0, 0].transAxes)    # axs[0, 1].boxplot(mads, vert=False, labels=names)
-#     # axs[0, 1].set_title('Mean Absolute Deviation (MAD) - Box Plot')
-
-#     # Plot MPD metrics
-#     axs[1].bar(names, mpds)
-#     axs[1].set_title('Mean Percentage Deviation (MPD)')
-#     # axs[1, 1].boxplot(mpds, vert=False, labels=names)
-#     # axs[1, 1].set_title('Mean Percentage Deviation (MPD) - Box Plot')
-
-#     # Plot Standard Deviation metrics
-#     axs[2].bar(names, std_devs)
-#     axs[2].set_title('Standard Deviation')
-#     # axs[2, 1].boxplot(std_devs, vert=False, labels=names)
-#     # axs[2, 1].set_title('Standard Deviation - Box Plot')
-
-#     fig.tight_layout(pad=5.0) # Add padding for better layout
-
-#     # Save it to a bytes buffer.
-#     bytes_image = io.BytesIO()
-#     plt.savefig(bytes_image, format='png')
-#     bytes_image.seek(0)
-#     encoded_string = base64.b64encode(bytes_image.read())
-#     return quote(encoded_string)
-
-
 def plot_metrics(optimization_res):
 
     # Extract metrics
-
     for obj in optimization_res:
         print(obj.evaluation_metrics)
 
@@ -1083,46 +1086,331 @@ def plot_metrics(optimization_res):
     print("mpds ",mpds)
     print("std ",std_devs)
 
-    # fig, axs = plt.subplots(3, figsize=(8,13)) # create 6 subplots
+    # MAD Plot
+    mad_fig = go.Figure(
+        data=[go.Bar(x=names, y=mads)],
+        layout=go.Layout(
+        autosize=False,
+        width=500,
+        height=500,
+    ),
+        layout_title_text="Mean Absolute Deviation (MAD)"
+    )
+    mad_fig_html = pio.to_html(mad_fig, full_html=False)
 
-    # Plotting MAD
-    fig1, ax1 = plt.subplots(figsize=(5,5))
-    ax1.bar(names, mads)
-    ax1.set_title('Mean Absolute Deviation (MAD)')
-    plt.xticks(rotation=10)  # Rotate x labels
-    img = io.BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    mad_plot_url = base64.b64encode(img.getvalue()).decode()
-    plt.close(fig1)
+    # MPD Plot
+    mpd_fig = go.Figure(
+        data=[go.Bar(x=names, y=mpds)],
+        layout=go.Layout(
+        autosize=False,
+        width=500,
+        height=500,
+    ),
+        layout_title_text="Mean Percentage Deviation (MPD)"
+    )
+    mpd_fig_html = pio.to_html(mpd_fig, full_html=False)
 
-    # Plotting MPD
-    fig2, ax2 = plt.subplots(figsize=(5,5))
-    ax2.bar(names, mpds)
-    ax2.set_title('Mean Percentage Deviation (MPD)')
-    plt.xticks(rotation=10)  # Rotate x labels
-    img = io.BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    mpd_plot_url = base64.b64encode(img.getvalue()).decode()
-    plt.close(fig2)
+    # STD Plot
+    std_fig = go.Figure(
+        data=[go.Bar(x=names, y=std_devs)],
+        layout=go.Layout(
+        autosize=False,
+        width=500,
+        height=500,
+    ),
+        layout_title_text="Standard Deviation (STD)"
+    )
+    std_fig_hmtl = pio.to_html(std_fig, full_html=False)
 
-    # Plotting STD
-    fig3, ax3 = plt.subplots(figsize=(5,5))
-    ax3.bar(names, std_devs)
-    ax3.set_title('Standard Deviation (STD)')
-    plt.xticks(rotation=10)  # Rotate x labels
-    img = io.BytesIO()
-    plt.savefig(img, format='png')
-    img.seek(0)
-    std_plot_url = base64.b64encode(img.getvalue()).decode()
-    plt.close(fig3)
-
-
-    return mad_plot_url, mpd_plot_url, std_plot_url
+    return mad_fig_html, mpd_fig_html, std_fig_hmtl
 
 
 
 def generate_course_data(request, optData_id):
     current_optData = optData.objects.get(id = optData_id)
+
+    current_optData.optMethod = 'weightedAverage'
+
+    if current_optData.lecturer_category == 'Novice':
+        for course, course_data in current_optData.courses.items():
+            course_data['courseContent']['CourseComplexity'] = random.randint(1, 2)
+            course_data['courseContent']['CourseFamiliarity'] = round(random.uniform(0.1, 0.3), 2)
+            course_data['courseContent']['contentWeight'] =  random.randint(1, 3)
+
+            course_data['courseDidactic']['CourseComplexity'] = random.randint(1, 2)
+            course_data['courseDidactic']['CourseFamiliarity'] = round(random.uniform(0.1, 0.3),2)
+            course_data['courseDidactic']['didacticWeight'] = random.randint(1, 3)
+
+            course_data['coursePresentation']['finished'] = round(random.uniform(0.1, 1),2)
+            course_data['coursePresentation']['time0'] = round(random.uniform(0.1, 1),2)
+            course_data['coursePresentation']['pres0'] = round(random.uniform(0.1, 1),2)
+            course_data['coursePresentation']['complexity'] = random.randint(1, 2)
+            course_data['coursePresentation']['presentationWeight'] = random.randint(1, 3)
+
+            course_data['courseImpact']['d'] = 2
+            course_data['courseLectTime']['d'] = round(random.uniform(1, 20), 1)
+            course_data['courseStudentCount']['students'] = random.randint(10, 300)
+
+            current_optData.save()
+
+
+            sumOfWeights = course_data['courseContent']['contentWeight'] + course_data['courseDidactic']['didacticWeight'] + course_data['coursePresentation']['presentationWeight']
+
+            course_data['courseContent']['norm_contentWeight'] = str(course_data['courseContent']['contentWeight'] / sumOfWeights)
+
+            course_data['courseDidactic']['norm_didacticWeight'] = str(course_data['courseDidactic']['didacticWeight'] / sumOfWeights)
+
+            course_data['coursePresentation']['norm_presentationWeight'] = str(course_data['coursePresentation']['presentationWeight'] / sumOfWeights)
+
+            current_optData.save()
     
+    elif current_optData.lecturer_category == 'Intermediate':
+        for course, course_data in current_optData.courses.items():
+            course_data['courseContent']['CourseComplexity'] = random.randint(3, 10)
+            course_data['courseContent']['CourseFamiliarity'] = round(random.uniform(0.31, 0.7), 2)
+            course_data['courseContent']['contentWeight'] =  random.randint(1, 3)
+
+            course_data['courseDidactic']['CourseComplexity'] = random.randint(3, 10)
+            course_data['courseDidactic']['CourseFamiliarity'] = round(random.uniform(0.31, 0.7),2)
+            course_data['courseDidactic']['didacticWeight'] = random.randint(1, 3)
+
+            course_data['coursePresentation']['finished'] = round(random.uniform(0.1, 1),2)
+            course_data['coursePresentation']['time0'] = round(random.uniform(0.1, 1),2)
+            course_data['coursePresentation']['pres0'] = round(random.uniform(0.1, 1),2)
+            course_data['coursePresentation']['complexity'] = random.randint(3, 10)
+            course_data['coursePresentation']['presentationWeight'] = random.randint(1, 3)
+
+            course_data['courseImpact']['d'] = 1.7
+            course_data['courseLectTime']['d'] = round(random.uniform(1, 20), 1)
+            course_data['courseStudentCount']['students'] = random.randint(10, 300)
+
+            current_optData.save()
+
+
+            sumOfWeights = course_data['courseContent']['contentWeight'] + course_data['courseDidactic']['didacticWeight'] + course_data['coursePresentation']['presentationWeight']
+
+            course_data['courseContent']['norm_contentWeight'] = str(course_data['courseContent']['contentWeight'] / sumOfWeights)
+
+            course_data['courseDidactic']['norm_didacticWeight'] = str(course_data['courseDidactic']['didacticWeight'] / sumOfWeights)
+
+            course_data['coursePresentation']['norm_presentationWeight'] = str(course_data['coursePresentation']['presentationWeight'] / sumOfWeights)
+
+            current_optData.save()
+    
+
+    elif current_optData.lecturer_category == 'Experienced':
+        for course, course_data in current_optData.courses.items():
+            course_data['courseContent']['CourseComplexity'] = random.randint(11, 20)
+            course_data['courseContent']['CourseFamiliarity'] = round(random.uniform(0.71, 1), 2)
+            course_data['courseContent']['contentWeight'] =  random.randint(1, 3)
+
+            course_data['courseDidactic']['CourseComplexity'] = random.randint(11, 20)
+            course_data['courseDidactic']['CourseFamiliarity'] = round(random.uniform(0.71, 1),2)
+            course_data['courseDidactic']['didacticWeight'] = random.randint(1, 3)
+
+            course_data['coursePresentation']['finished'] = round(random.uniform(0.1, 1),2)
+            course_data['coursePresentation']['time0'] = round(random.uniform(0.1, 1),2)
+            course_data['coursePresentation']['pres0'] = round(random.uniform(0.1, 1),2)
+            course_data['coursePresentation']['complexity'] = random.randint(11, 20)
+            course_data['coursePresentation']['presentationWeight'] = random.randint(1, 3)
+
+            course_data['courseImpact']['d'] = 1
+            course_data['courseLectTime']['d'] = round(random.uniform(1, 20), 1)
+            course_data['courseStudentCount']['students'] = random.randint(10, 300)
+
+            current_optData.save()
+
+
+            sumOfWeights = course_data['courseContent']['contentWeight'] + course_data['courseDidactic']['didacticWeight'] + course_data['coursePresentation']['presentationWeight']
+
+            course_data['courseContent']['norm_contentWeight'] = str(course_data['courseContent']['contentWeight'] / sumOfWeights)
+
+            course_data['courseDidactic']['norm_didacticWeight'] = str(course_data['courseDidactic']['didacticWeight'] / sumOfWeights)
+
+            course_data['coursePresentation']['norm_presentationWeight'] = str(course_data['coursePresentation']['presentationWeight'] / sumOfWeights)
+
+            current_optData.save()
+    
+
+    else:   
+        #we navigate to courses dict and iterate over each courses(key, value) pair and generate the random data (ranges here aren't set up properly)
+        for course, course_data in current_optData.courses.items():
+            course_data['courseContent']['CourseComplexity'] = int(random.uniform(1, 1.9))
+            course_data['courseContent']['CourseFamiliarity'] = round(random.uniform(0.1, 1), 2)
+            course_data['courseContent']['contentWeight'] =  int(random.uniform(1, 3))
+
+            course_data['courseDidactic']['CourseComplexity'] = int(random.uniform(1, 1.9))
+            course_data['courseDidactic']['CourseFamiliarity'] = round(random.uniform(0.1, 1),2)
+            course_data['courseDidactic']['didacticWeight'] = int(random.uniform(1, 3))
+
+            course_data['coursePresentation']['finished'] = round(random.uniform(0.1, 1),2)
+            course_data['coursePresentation']['time0'] = round(random.uniform(0.1, 1),2)
+            course_data['coursePresentation']['pres0'] = round(random.uniform(0.1, 1),2)
+            course_data['coursePresentation']['complexity'] = int(random.uniform(1, 20))
+            course_data['coursePresentation']['presentationWeight'] = int(random.uniform(1, 3))
+
+            course_data['courseImpact']['d'] = round(random.uniform(1, 2), 1)
+            course_data['courseLectTime']['d'] = round(random.uniform(1, 20), 1)
+            course_data['courseStudentCount']['students'] = int(random.uniform(10, 300))
+
+            current_optData.save()
+
+
+            sumOfWeights = course_data['courseContent']['contentWeight'] + course_data['courseDidactic']['didacticWeight'] + course_data['coursePresentation']['presentationWeight']
+
+            course_data['courseContent']['norm_contentWeight'] = str(course_data['courseContent']['contentWeight'] / sumOfWeights)
+
+            course_data['courseDidactic']['norm_didacticWeight'] = str(course_data['courseDidactic']['didacticWeight'] / sumOfWeights)
+
+            course_data['coursePresentation']['norm_presentationWeight'] = str(course_data['coursePresentation']['presentationWeight'] / sumOfWeights)
+            current_optData.save()
+
+    return redirect(reverse('editCourse', args = [current_optData.pk, next(iter(current_optData.courses))]))
+
+
+
+def generate_weights(request, optData_id, weight_type):
+    current_optData = get_object_or_404(optData, id=optData_id)
+
+    def gen_high():
+        # Generate high weights
+        for cour, course_data in current_optData.courses.items():
+            course_data['courseContent']['contentWeight'] =  3
+            course_data['courseDidactic']['didacticWeight'] = 3
+            course_data['coursePresentation']['presentationWeight'] = 3
+            current_optData.weight_category = "high_W"
+            current_optData.save()
+
+            sumOfWeights = course_data['courseContent']['contentWeight'] + course_data['courseDidactic']['didacticWeight'] + course_data['coursePresentation']['presentationWeight']
+
+            course_data['courseContent']['norm_contentWeight'] = str(course_data['courseContent']['contentWeight'] / sumOfWeights)
+
+            course_data['courseDidactic']['norm_didacticWeight'] = str(course_data['courseDidactic']['didacticWeight'] / sumOfWeights)
+
+            course_data['coursePresentation']['norm_presentationWeight'] = str(course_data['coursePresentation']['presentationWeight'] / sumOfWeights)
+
+            current_optData.save()
+
+
+    def gen_mid():
+        # Generate medium weights
+        for cour, course_data in current_optData.courses.items():
+            course_data['courseContent']['contentWeight'] =  2
+            course_data['courseDidactic']['didacticWeight'] = 2
+            course_data['coursePresentation']['presentationWeight'] = 2
+            current_optData.weight_category = "mid_W"
+            current_optData.save()
+
+            sumOfWeights = course_data['courseContent']['contentWeight'] + course_data['courseDidactic']['didacticWeight'] + course_data['coursePresentation']['presentationWeight']
+
+            course_data['courseContent']['norm_contentWeight'] = str(course_data['courseContent']['contentWeight'] / sumOfWeights)
+
+            course_data['courseDidactic']['norm_didacticWeight'] = str(course_data['courseDidactic']['didacticWeight'] / sumOfWeights)
+
+            course_data['coursePresentation']['norm_presentationWeight'] = str(course_data['coursePresentation']['presentationWeight'] / sumOfWeights)
+
+            current_optData.save()
+
+    def gen_low():
+        # Generate low weights
+        for cour, course_data in current_optData.courses.items():
+            course_data['courseContent']['contentWeight'] =  1
+            course_data['courseDidactic']['didacticWeight'] = 1
+            course_data['coursePresentation']['presentationWeight'] = 1
+            current_optData.weight_category = "low_W"
+            current_optData.save()
+
+            sumOfWeights = course_data['courseContent']['contentWeight'] + course_data['courseDidactic']['didacticWeight'] + course_data['coursePresentation']['presentationWeight']
+
+            course_data['courseContent']['norm_contentWeight'] = str(course_data['courseContent']['contentWeight'] / sumOfWeights)
+
+            course_data['courseDidactic']['norm_didacticWeight'] = str(course_data['courseDidactic']['didacticWeight'] / sumOfWeights)
+
+            course_data['coursePresentation']['norm_presentationWeight'] = str(course_data['coursePresentation']['presentationWeight'] / sumOfWeights)
+
+            current_optData.save()
+
+    def gen_rand():
+        # Generate random weights
+        for cour, course_data in current_optData.courses.items():
+            course_data['courseContent']['contentWeight'] =  random.randint(1, 3)
+            course_data['courseDidactic']['didacticWeight'] = random.randint(1, 3)
+            course_data['coursePresentation']['presentationWeight'] = random.randint(1, 3)
+            current_optData.weight_category = "rand_W"
+            current_optData.save()
+
+            sumOfWeights = course_data['courseContent']['contentWeight'] + course_data['courseDidactic']['didacticWeight'] + course_data['coursePresentation']['presentationWeight']
+
+            course_data['courseContent']['norm_contentWeight'] = str(course_data['courseContent']['contentWeight'] / sumOfWeights)
+
+            course_data['courseDidactic']['norm_didacticWeight'] = str(course_data['courseDidactic']['didacticWeight'] / sumOfWeights)
+
+            course_data['coursePresentation']['norm_presentationWeight'] = str(course_data['coursePresentation']['presentationWeight'] / sumOfWeights)
+
+            current_optData.save()
+
+    
+    if weight_type == 'low':
+        gen_low()
+    elif weight_type == 'mid':
+        gen_mid()
+    elif weight_type == 'high':
+        gen_high()
+    elif weight_type == 'rand':
+        gen_rand()
+
+    return redirect(reverse('editCourse', args = [current_optData.pk, next(iter(current_optData.courses))]))
+
+
+def clone_optData(request, optData_id):
+    current_optData = optData.objects.get(id = optData_id)
+    clone = optData.objects.create(   semesterName = current_optData.semesterName,
+                                        totalHours = current_optData.totalHours,
+                                        optMethod = current_optData.optMethod,
+                                        courses = current_optData.courses,
+                                        lecturer = current_optData.lecturer,
+                                        picked_course = None,
+                                        lecturer_category = current_optData.lecturer_category,
+                                        weight_category = '0',
+                                        status = '*',
+                                        clone = 'clone', 
+                                        
+                                    ) 
+    clone.save()
+
+    #create corresponding optResults: 
+    new_optResult = optResults.objects.create(  semesterName = clone.semesterName, 
+                                            totalHours = clone.totalHours,
+                                            optMethod = clone.optMethod,
+                                            optimizationResults = {},
+                                            optDataObj = clone, 
+
+                                        )   
+    new_optResult.save()
+
+    return redirect('allCourseParameters')
+
+def eval_profile(request, optData_id, profile):
+    current_optData = get_object_or_404(optData, id=optData_id)
+
+    def intermediate():
+        current_optData.lecturer_category = 'Intermediate'
+        current_optData.save()
+
+    def experienced():
+        current_optData.lecturer_category = 'Experienced'
+        current_optData.save()
+
+    if profile == 'Intermediate':
+        intermediate()
+
+    elif profile == 'Experienced':
+        experienced()
+    else:
+        current_optData.lecturer_category = '#'
+        current_optData.save()
+    
+    return redirect(reverse('editCourse', args = [current_optData.pk, next(iter(current_optData.courses))]))
+
+    
+

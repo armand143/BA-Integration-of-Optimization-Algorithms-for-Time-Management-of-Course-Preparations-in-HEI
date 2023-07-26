@@ -69,6 +69,20 @@
 <body>
 
     <div class="content-area">
+        {% with current_optData.courses|length as num_courses %}
+            <p class="text-center" style="color:gray; font-style: italic;">
+                {% if current_optData.status == "*" %}
+                *
+                {% else %}
+                {% endif %}
+
+
+                {{current_optData.clone}} | {{current_optData.semesterName}} | {{current_optData.totalHours}} hrs | <span class="text_green"> {{current_optData.optMethod }} </span> | {{ num_courses }} course(s)
+                | <span style="font-style: italic; color: grey;">{{current_optData.lecturer_category}}</span>
+                | <span style="font-style: italic; color: grey;">{{current_optData.weight_category}}</span>
+            </p>
+        {% endwith %}
+
         <h1 class="text-center">Please enter course configurations</h1>
 
         <br>
@@ -81,86 +95,109 @@
                 </h5>
 
                 {% if current_optData.courses|length > 0 %}
-                {% for course,course_content in current_optData.courses.items %}
+                    {% for course,course_content in current_optData.courses.items %}
 
 
-                    <div class = "row col-12">
-                        <div class = "col-7">
-                            <a href="{% url 'editCourse' optData_id=current_optData.id key=course %}">
-                                {{course}}
-                            </a>
-                        </div>
-
-                        <div class = col-2>
-                            <a href="{% url 'delete_optCourse' optData_id=current_optData.id key=course %}"
-                            class="btn-sm btn-danger"> x </a>
-                        </div>
-
-                        <div class = "col-3" style="color: green">
-                            {% if course_content.courseEstTime.expectedAllocation %}
-                                {{course_content.courseEstTime.expectedAllocation }} h
-                            {% else %}
-                                
-                            {% endif %}
-                        </div>
-                        
-                    </div>
-                    <hr>
-                
-                    <!-- <div class="d-flex justify-content-between align-items-center"> 
-                        <ul>
-                            <li>
+                        <div class = "row col-12">
+                            <div class = "col-7">
                                 <a href="{% url 'editCourse' optData_id=current_optData.id key=course %}">
                                     {{course}}
                                 </a>
-        
+                            </div>
+
+                            <div class = col-2>
                                 <a href="{% url 'delete_optCourse' optData_id=current_optData.id key=course %}"
-                                    class="btn-sm btn-danger "> x </a>
-                            </li>
-                        </ul>
-                    </div> -->
+                                class="btn-sm btn-danger"> x </a>
+                            </div>
 
-                {% endfor %}
+                            <div class = "col-3" style="color: green">
+                                {% if course_content.courseEstTime.expectedAllocation %}
+                                    {{course_content.courseEstTime.expectedAllocation }} h
+                                {% else %}
+                                    
+                                {% endif %}
+                            </div>
+                            
+                        </div>
 
+                        <hr>
+                    
+                    {% endfor %}
 
                 {% else %}
 
-                <h3 class="mt-5">
-                    No courses here! You might want to return to your <a href="{% url 'profile_view' %}"> profile</a> to
-                    add courses
-                </h3>
+                    <h3 class="mt-5">
+                        No courses here! You might want to return to your <a href="{% url 'profile_view' %}"> profile</a> to
+                        add courses
+                    </h3>
 
 
                 {% endif %}
 
-                <div class = "card aspects_info_card">
-                    <div class = "card-body ">
-                        <h5> More details to different parameters for courses</h5>
+                <!-- <hr> -->
 
-                        <strong> Content:</strong>
-                        <br>
-                        Content Aspect refers to the actual substance or material that makes up the course. This includes the topics, concepts, theories, and facts being taught. It covers everything the students need to learn and understand in a specific course or subject.
-                        <hr>
+                <div class = "row ">
+                    <div class = "col-7">
+                        Hours not yet allocated
+                    </div>
 
-                        <strong> Didactic:</strong>
-                        <br>
-                        Didactic Aspect refers to the teaching methods, strategies, and techniques used to present the course content effectively. This includes how the material is organized, explained, and demonstrated to facilitate students' learning and understanding of the topics being taught.
-                        <hr>
-
-                        <strong> Presentation:</strong>
-                        <br>
-                        Presentation Aspect refers to how the course material is organized, delivered, and communicated to the students. It includes elements such as the structure of the lectures, the choice of examples or case studies, the use of visual aids, and the methods of engaging students in the learning process.
-                        <hr>
-
-                        <strong> Impact:</strong>
-                        <br>
-                        refers to the effect that a course has on students' learning and understanding of the material. It relates to the teaching methods and content delivery, and how effectively they help students grasp the concepts being taught.
-                        <hr>
-
+                    <div class = col-2>
 
                     </div>
+
+                    <div class = "col-3" style="color: red">
+                        {{hours_left}} h
+                    </div>
+                    
                 </div>
 
+                <hr>
+
+                <div class = "row ">
+                    <a href = "{% url 'generate_course_data' optData_id=current_optData.id %}" class = "btn-sm btn-primary"> generate for all </a>
+                    <a href="{% url 'generate_weights' current_optData.id 'low' %}" class = "btn-sm btn-primary">Generate Low Weights</a>
+                    <a href="{% url 'generate_weights' current_optData.id 'mid' %}" class = "btn-sm btn-primary">Generate Medium Weights</a>
+                    <a href="{% url 'generate_weights' current_optData.id 'high' %}" class = "btn-sm btn-primary">Generate High Weights</a>
+                    <a href="{% url 'generate_weights' current_optData.id 'rand' %}" class = "btn-sm btn-primary">Generate Random Weights</a>
+                    &nbsp;
+                    <a href="{% url 'eval_profile' current_optData.id 'Intermediate' %}" class = "btn-sm btn-primary">Intermediate</a>
+                    <a href="{% url 'eval_profile' current_optData.id 'Experienced' %}" class = "btn-sm btn-primary">Experienced</a>
+                    <a href="{% url 'eval_profile' current_optData.id 'reset profile' %}" class = "btn-sm btn-primary">reset profile</a>
+
+
+                </div>
+                <hr>
+                
+                <div class = "row ">
+                    <div class = "card aspects_info_card">
+
+                        <div class = "card-body ">
+                            <h5> More details to different parameters for courses</h5>
+    
+                            <strong> Content:</strong>
+                            <br>
+                            Content Aspect refers to the actual substance or material that makes up the course. This includes the topics, concepts, theories, and facts being taught. It covers everything the students need to learn and understand in a specific course or subject.
+                            <hr>
+    
+                            <strong> Didactic:</strong>
+                            <br>
+                            Didactic Aspect refers to the teaching methods, strategies, and techniques used to present the course content effectively. This includes how the material is organized, explained, and demonstrated to facilitate students' learning and understanding of the topics being taught.
+                            <hr>
+    
+                            <strong> Presentation:</strong>
+                            <br>
+                            Presentation Aspect refers to how the course material is organized, delivered, and communicated to the students. It includes elements such as the structure of the lectures, the choice of examples or case studies, the use of visual aids, and the methods of engaging students in the learning process.
+                            <hr>
+    
+                            <strong> Impact:</strong>
+                            <br>
+                            refers to the effect that a course has on students' learning and understanding of the material. It relates to the teaching methods and content delivery, and how effectively they help students grasp the concepts being taught.
+                            <hr>
+    
+    
+                        </div>
+                    </div>
+                </div>
 
             </div>
 
@@ -239,7 +276,7 @@
                                     <div class="col-xs-3 mx-5" style="color: green;">
                                         <div class="form-group" style="display: flex; flex-direction: column">
                                             <label class="col-form-label"
-                                                for="{{ form.courseEstTime.id_for_label }}">Est. Time allocation:
+                                                for="{{ form.courseEstTime.id_for_label }}">ExpectedTimeAllocation:
                                                 <span class="tooltip-icon" data-toggle="tooltip" data-html="true"
                                                     data-placement="right"
                                                     title="Expected Time Allocation <br>
@@ -247,9 +284,9 @@
                                                     How much time do you estimate will be necessary for the preparation of this course <br>
 
                                                     **************************<br>
-                                                    Please keep in mind the sum of your estimations shouldn't exceed {{ request.user.lecturer_profile.time_available }} hrs">?</span>
+                                                    choose a value between 1 and  {{ hours_left }} hrs">?</span>
                                             </label>
-                                            <input type="number" id="{{ form.courseEstTime.id_for_label }}" name="{{ form.courseEstTime.name }}" value="{{ form.courseEstTime.value }}" min="1" max="{{ request.user.lecturer_profile.time_available }}" step="0.1" required>
+                                            <input type="number" id="{{ form.courseEstTime.id_for_label }}" name="{{ form.courseEstTime.name }}" value="{{ form.courseEstTime.value }}" min="0.1" max="{{ request.user.lecturer_profile.time_available }}" step="0.1" required>
                                         </div>
                                     </div>
 
@@ -307,7 +344,7 @@
                                                     - High experience [0.7, 1] 
                                                     ">?</span>
                                             </label>
-                                            <input type="number" id="{{ form.courseContentFamiliarity.id_for_label }}" name="{{ form.courseContentFamiliarity.name }}" value="{{ form.courseContentFamiliarity.value }}" min="0.1" max="1.0" step="0.01" required>
+                                            <input type="number" id="{{ form.courseContentFamiliarity.id_for_label }}" name="{{ form.courseContentFamiliarity.name }}" value="{{ form.courseContentFamiliarity.value }}" min="0.0" max="1.0" step="0.01" required>
                                             <ul>
                                             {% if form.courseContentFamiliarity.errors %}
                                                 {% for error in form.courseContentFamiliarity.errors %}
@@ -404,7 +441,7 @@
                                                         <br><br>
                                                         ">?</span>
                                                 </label>
-                                                <input type="number" id="{{ form.courseDidacticFamiliarity.id_for_label }}" name="{{ form.courseDidacticFamiliarity.name }}" value="{{ form.courseDidacticFamiliarity.value }}" min="0.1" max="1.0" step="0.01" required>
+                                                <input type="number" id="{{ form.courseDidacticFamiliarity.id_for_label }}" name="{{ form.courseDidacticFamiliarity.name }}" value="{{ form.courseDidacticFamiliarity.value }}" min="0.0" max="1.0" step="0.01" required>
                                             
                                                 {% if form.courseDidacticFamiliarity.errors %}
                                                 <ul>
@@ -469,7 +506,7 @@
 
                                                     ">?</span>
                                             </label>
-                                            <input type="number" id="{{ form.coursePresentationFinished.id_for_label }}" name="{{ form.coursePresentationFinished.name }}" value="{{ form.coursePresentationFinished.value }}" min="0.1" max="1.0" step="0.01" required>
+                                            <input type="number" id="{{ form.coursePresentationFinished.id_for_label }}" name="{{ form.coursePresentationFinished.name }}" value="{{ form.coursePresentationFinished.value }}" min="0.0" max="1.0" step="0.01" required>
                                             
                                             {% if form.coursePresentationFinished.errors %}
                                             <ul>
@@ -649,7 +686,7 @@
                                                     
                                                     ">?</span>
                                             </label>
-                                            <input type="number" id="{{ form.courseLectTime.id_for_label }}" name="{{ form.courseLectTime.name }}" value="{{ form.courseLectTime.value }}" min="0.5" max="40" step="0.5" required>
+                                            <input type="number" id="{{ form.courseLectTime.id_for_label }}" name="{{ form.courseLectTime.name }}" value="{{ form.courseLectTime.value }}" min="0.5" max="40" step="0.1" required>
                                             {% if form.courseLectTime.errors %}
                                             <ul class="errorlist">
                                                 {% for error in form.courseLectTime.errors %}
@@ -692,7 +729,7 @@
                                 <div class="text-center">
                                     <button type="submit" value="Submit" class="btn btn-dark mx-auto">save course data</button>
 
-                                    <a href="{% url 'allCourseParameters' %}" class="btn btn-success">overview and computation</a>
+                                    <a href="{% url 'overviewButton' optData_id=current_optData.id  %}" class="btn btn-success">overview</a>
                                 </div>
 
 

@@ -52,30 +52,13 @@
     <div class="container-fluid">
 
         <h1 class="text-center"> Results overview with other optimization methods</h1>
-        <hr>
-            {% with current_optData.courses|length as num_courses %}
-                <h2 class="text-center" style="color: blue">
-                    {% if current_optData.status == "*" %}
-                    *
-                    {% else %}
-                    {% endif %}
-    
-    
-                    {{current_optData.clone}} | {{current_optData.semesterName}} | {{current_optData.totalHours}} hrs | <span class="text_green"> {{current_optData.optMethod }} </span> | {{ num_courses }} course(s)
-                     | <span style="font-style: italic; color: grey;">{{current_optData.lecturer_category}}</span>
-                     | <span style="font-style: italic; color: grey;">{{current_optData.weight_category}}</span>
-                </h2>
-            {% endwith %}
-
         <div class = "row">
             <div class = "col-12 mx-auto">
 
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                        <th colspan="5" class="text-center">Total Preparation Time in Hours 
-                            
-                        </th>
+                        <th colspan="5" class="text-center">Total Preparation Time in Hours</th>
                         </tr>
 
                         <tr>
@@ -191,18 +174,8 @@
                             {{mad_text}}
                         </p>
                     </div>
-
+        
                     <div class = "col-md-6">
-                        {% autoescape off %}
-                            {{ std_image_html }}
-                        {% endautoescape %}
-        
-                        <p style="color: green;">
-                            {{std_text}}
-                        </p>
-                    </div>
-        
-                    <!-- <div class = "col-md-6">
                         {% autoescape off %}
                             {{ mpd_image_html }}
                         {% endautoescape %}
@@ -210,12 +183,12 @@
                         <p style="color: green;">
                             {{mpd_text}}
                         </p>
-                    </div> -->
+                    </div>
                 <div>
         
                     <br>
         
-                <!-- <div class = "row">
+                <div class = "row">
                     <div class = "col-md-6">
                         {% autoescape off %}
                             {{ std_image_html }}
@@ -225,12 +198,12 @@
                             {{std_text}}
                         </p>
                     </div>
-                </div> -->
+                </div>
 
         
             </div>
         </div>
-
+        
     </div>
 
       

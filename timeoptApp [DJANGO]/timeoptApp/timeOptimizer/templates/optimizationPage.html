@@ -82,142 +82,145 @@
                         </thead>
                         <tbody>
                             {% for obj in all_params %}
-                            <tr>
-                                <td>
+                                <tr>
+                                    <td>
 
-                                    <div class="content-to-toggle hide-content">
+                                        <div class="content-to-toggle hide-content">
 
-                                        {% with obj.courses|length as num_courses %}
-                                        <h5 style="font-weight: bold;">
+                                            {% with obj.courses|length as num_courses %}
+                                            <h5 style="font-weight: bold;">
 
-                                            {% if obj.status == "*" %}
-                                            *
-                                            {% else %}
-                                            {% endif %}
-
-
-                                            {{obj.semesterName}} | {{obj.totalHours}} hrs | <span class="text_green"> {{obj.optMethod }} </span> | {{ num_courses }} course(s)
-                                        </h5>
-                                        {% endwith %}
-
-                                        {% now "d-m-Y" as today %}
-                                        <div style="font-style: italic; font-size: small; color: grey;">
-                                            {% if obj.created_at|date:"d-m-Y" == today %}
-                                                today at {{ obj.created_at|date:"h:i a" }}
-                                            {% elif obj.edited_at > obj.created_at %}
-                                                last update: {{obj.edited_at}} <br>
-                                            {% else %}
-                                                created at: {{obj.created_at}} <br>
-                                            {% endif %}
-                                        </div>
-
-                                        <br>
-                                        <br>
-
-                                        semester name: {{obj.semesterName}} <br><br>
-                                        total hours: {{obj.totalHours}}<br><br>
-                                        optimization method: {{ obj.optMethod }}<br><br>
-                                        lecturer name: {{request.user.lecturer_profile.lecturer_name}}<br><br>
-                                        courses: <br>
-
-                                        {% for k_course_name,v_course_aspects in obj.courses.items %}
-                                        <strong><a href="{% url 'editCourse' optData_id=obj.id key=k_course_name %}">
-                                                {{k_course_name}} </a></strong> <br>
-
-                                        {% for k1, v1 in v_course_aspects.items %}
-                                        <strong> {{k1}} </strong> <br>
-
-                                        {% for k2, v2 in v1.items %}
-                                        {{k2}} : {{v2}}
-                                        <br>
-
-                                        {% endfor %}
-                                        {% endfor %}
-                                        <br><br>
-                                        {% endfor %}
-
-                                        <div class="text-left">
-                                            <a href="{% url 'addCourseParameter' id=obj.id %}"
-                                                class="btn-sm btn-primary">+ add a course </a> &nbsp;
-                                            <a href="{% url 'optimizerWebService' optDataID=obj.id %}"
-                                                class="btn-sm btn-success">optimize </a> &nbsp;
-                                            <a href="{% url 'delete_optData' optData_id=obj.id %}"
-                                                class="btn-sm btn-danger">delete </a> &nbsp;
-                                        </div>
-
-                                    </div>
-
-                                    <br>
-
-                                </td>
-
-                                <td class="d-flex">
-                                    <div class="content-to-toggle hide-content flex-grow-1">
-
-                                        {% if obj.opt_results.optimizationResults|length != 0 %}
-
-                                        <h5 style="font-weight: bold; color: green;">
-                                            results
-                                        </h5>
-
-                                        <!-- there's a detaill to watch out for, look in views under editCourse what's updates first, optData or it's optResults -->
-                                        {% if obj.edited_at > obj.opt_results.created_at %}
-                                        <p style="color: red;"> ({{obj.opt_results.status}}) </p>
-                                        {% else %}
-                                        {% endif %}
-
-                                        {% if obj.opt_results.update_status == "(new)" %}
-                                        <p style="color: green;"> {{obj.opt_results.update_status}} </p>
-                                        {% else %}
-                                        {% endif %}
-
-
-                                        <br>
-
-                                        {% for k,v in obj.opt_results.optimizationResults.items %}
-                                            <strong>{{k}}</strong> <br>
-                                            {% for k1,v1 in v.items %}
-
-                                                {% if k1 != 'course_metrics' %}
-                                                
-                                                    {% if "percentage" in k1 %}
-                                                    {{k1}} : <span style="color: blue;"> {{v1}} </span>
-                                                    {% else %}
-                                                        {{k1}} : {{v1}}
-                                                    {% endif %}
-                                                    <br>
-
+                                                {% if obj.status == "*" %}
+                                                *
+                                                {% else %}
                                                 {% endif %}
 
-                                            {% endfor %}
 
-                                            <hr>
+                                                {{obj.clone}} | {{obj.semesterName}} | {{obj.totalHours}} hrs | <span class="text_green"> {{obj.optMethod }} </span> | {{ num_courses }} course(s)
+                                                 | <span style="font-style: italic; color: grey;">{{obj.lecturer_category}}</span>
+                                                 | <span style="font-style: italic; color: grey;">{{obj.weight_category}}</span>
+
+                                            </h5>
+                                            {% endwith %}
+
+                                            {% now "d-m-Y" as today %}
+                                            <div style="font-style: italic; font-size: small; color: grey;">
+                                                {% if obj.created_at|date:"d-m-Y" == today %}
+                                                    today at {{ obj.created_at|date:"h:i a" }}
+                                                {% elif obj.edited_at > obj.created_at and obj.edited_at|date:"d-m-Y" == today %}
+                                                    updated today at {{obj.edited_at|date:"h:i a"}} <br>
+                                                {% elif obj.edited_at > obj.created_at %}
+                                                    last update:  {{ obj.edited_at}}
+                                                {% else %}
+                                                    created at: {{obj.created_at}} <br>
+                                                {% endif %}
+                                            </div>
 
                                             <br>
+                                            <br>
 
-                                        {% endfor %}
+                                            semester name: {{obj.semesterName}} <br><br>
+                                            total hours: {{obj.totalHours}}<br><br>
+                                            optimization method: {{ obj.optMethod }}<br><br>
+                                            lecturer name: {{request.user.lecturer_profile.lecturer_name}}<br><br>
+                                            courses: <br>
 
-                                        {% else %}
+                                            {% for k_course_name,v_course_aspects in obj.courses.items %}
+                                                <strong><a href="{% url 'editCourse' optData_id=obj.id key=k_course_name %}">
+                                                    {{k_course_name}} </a></strong> <br>
 
-                                        <h5 style="font-weight: bold; color: red;">
-                                            No optimization results found
-                                        </h5>
-                                        {% endif %}
+                                                {% for k1, v1 in v_course_aspects.items %}
+                                                    <strong> {{k1}} </strong> <br>
 
-                                    </div>
-                                    <div class="button-wrapper">
-                                        <a class="toggle-content-link custom-link">
-                                            show
-                                        </a>
+                                                    {% for k2, v2 in v1.items %}
+                                                        {{k2}} : {{v2}}
+                                                        <br>
 
-                                        <a class="btn-sm btn-secondary "
-                                            href="{% url 'optimizationOverview' optData_id=obj.id %}">
-                                            summary
-                                        </a>
-                                    </div>
+                                                    {% endfor %}
+                                                {% endfor %}
+                                                <br><br>
+                                            {% endfor %}
 
-                                </td>
-                            </tr>
+                                            <div class="text-left">
+                                                <a href="{% url 'addCourseParameter' id=obj.id %}"
+                                                    class="btn-sm btn-primary">+ add a course </a> &nbsp;
+                                                <a href="{% url 'optimizerWebService' optDataID=obj.id %}"
+                                                    class="btn-sm btn-success">optimize </a> &nbsp;
+                                                <a href="{% url 'delete_optData' optData_id=obj.id %}"
+                                                    class="btn-sm btn-danger">delete </a> &nbsp;
+                                                <a href="{% url 'clone_optData' optData_id=obj.id %}"
+                                                class="btn-sm btn-secondary">clone </a> &nbsp;
+                                            </div>
+
+                                        </div>
+
+                                        <br>
+
+                                    </td>
+
+                                    <td class="d-flex">
+                                        <div class="content-to-toggle hide-content flex-grow-1">
+                                            {% if obj.opt_results.optimizationResults|length != 0 %}
+
+                                                <h5 style="font-weight: bold; color: green;">
+                                                    results
+                                                </h5>
+
+                                                <!-- there's a detaill to watch out for, look in views under editCourse what's updates first, optData or it's optResults -->
+
+
+                                                {% if obj.opt_results.update_status == "update results for applied changes" %}
+                                                    <p style="color: red;"> ({{obj.opt_results.status}}) </p>
+                                                {% elif obj.opt_results.update_status == "(new)" %}
+                                                    <p style="color: green;"> {{obj.opt_results.update_status}} </p>
+                                                {% endif %}
+
+                                                <br>
+
+                                                {% for k,v in obj.opt_results.optimizationResults.items %}
+                                                    <strong>{{k}}</strong> <br>
+                                                    {% for k1,v1 in v.items %}
+
+                                                        {% if k1 != 'course_metrics' %}
+                                                        
+                                                            {% if "percentage" in k1 %}
+                                                                {{k1}} : <span style="color: blue;"> {{v1}} </span>
+                                                            {% else %}
+                                                                {{k1}} : {{v1}} hrs
+                                                            {% endif %}
+                                                            <br>
+
+                                                        {% endif %}
+
+                                                    {% endfor %}
+
+                                                    <hr>
+
+                                                    <br>
+
+                                                {% endfor %}
+
+                                            {% else %}
+
+                                                <h5 style="font-weight: bold; color: red;">
+                                                    No optimization results found
+                                                </h5>
+                                            {% endif %}
+
+                                        </div>
+                                        <div class="button-wrapper">
+                                            <a class="toggle-content-link custom-link">
+                                                show
+                                            </a>
+
+                                            <a class="btn-sm btn-secondary "
+                                                href="{% url 'optimizationOverview' optData_id=obj.id %}">
+                                                summary
+                                            </a>
+                                        </div>
+
+                                    </td>
+                                </tr>
                             {% endfor %}
                         </tbody>
                     </table>

@@ -49,8 +49,8 @@ class course(models.Model):
 
 class semester(models.Model):
     semester_name = models.CharField(max_length=250)
-    semesterModules = models.JSONField() #Should be used to control to the availability of different courses
-    coursesInSemester = models.JSONField()
+    semesterModules = models.JSONField(default={"":{}}) #Should be used to control to the availability of different courses
+    coursesInSemester = models.JSONField(default={"":{}})
 
     def __str__(self):
         return self.semester_name
@@ -78,7 +78,7 @@ class Lecturer(models.Model):
     courseOffered = models.ManyToManyField(course, blank=True)
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='lecturer_profile')
     picked_semester = models.ManyToManyField(semester, blank=True)
-    time_available = models.IntegerField(default=0)
+    time_available = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     profile_picture = models.ImageField(upload_to="profile_pics", default= "default_pro_pic.jpg")
     lecturer_email = models.CharField(max_length=250, default="foobar@jetmail.com")
     
@@ -95,6 +95,19 @@ class optData(models.Model):
         ('min', 'min'),
         ('weightedAverage', 'weightedAverage'),
     ]
+    lecturerCategories = [
+        ('#', '#'),
+        ('Novice', 'Novice'),
+        ('Intermediate', 'Intermediate'),
+        ('Experienced','Experienced')
+    ]
+    WeightCategories = [
+        ('0', '0'),
+        ('high_W', 'high_W'),
+        ('mid_W', 'mid_W'),
+        ('low_W','low_W'),
+        ('rand_W', 'rand_W')
+    ]
     semesterName = models.CharField(max_length=250)
     totalHours = models.DecimalField(default = 0, max_digits=5, decimal_places=2)
     optMethod = models.CharField(max_length=20, choices=OptimizationMethods)
@@ -104,10 +117,14 @@ class optData(models.Model):
     # counter = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     edited_at = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=50, default='default_value')
+    status = models.CharField(max_length=50, default='probably a copy') # when set to '*' then it shows that optData is the first created (original)
+    lecturer_category = models.CharField(max_length=20, choices=lecturerCategories, default='#') # options: 'eval', 'Novice', ' Intermediate ', ' Experienced '
+    weight_category = models.CharField(max_length=20, choices=WeightCategories, default='0')
+    clone = models.CharField(max_length=50, default='')
+
 
     def __str__(self):
-        return  "/" + self.semesterName + "/" + self.optMethod + "/" + str(self.lecturer)
+        return  "/" + self.lecturer_category + "/" + self.semesterName + "/" + self.optMethod + "/" + str(self.lecturer)
     
     # def save(self, *args, **kwargs):
     #     self.edited_at = timezone.now()

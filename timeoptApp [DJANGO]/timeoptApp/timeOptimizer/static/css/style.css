@@ -124,6 +124,13 @@ body {
 
 }
 
+
+.last-element-before-footer {
+    padding-bottom: 90px; /* or however much space you need */
+}
+
+
+
 @media only screen and (max-width: 768px) {
     .card-body input {
         width: 100%;
@@ -226,7 +233,7 @@ body {
 
 /* -------------------------------------------------------------------------------------------------------- */
   .aspects_info_card{
-    position: absolute;
+    position: relative; /*change back to "absolute" if any problem with shape or size arises */
     bottom: 0;
     max-height: 600px; /* desired height limit here */
     overflow-y: auto; /* scrollbar if the content exceeds the limit */
