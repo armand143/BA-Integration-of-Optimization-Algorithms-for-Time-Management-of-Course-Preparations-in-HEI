@@ -50,7 +50,8 @@ pip install -r requirements.txt
 Navigate to the Django project directory:
 cd timeoptApp [DJANGO]/timeoptApp
 
-## Setting up the Django web application Setting up the Spring Boot backend
+## Setting up the Spring Boot backend
+
 Navigate to the Spring Boot project directory:
 cd SpringAPIService/rest-serviceS/timeOpta
 
@@ -59,12 +60,14 @@ mvn clean install
 
 
 ## Usage
+
 ### Running the Django web application
 
 Start the Django development server:
 python manage.py runserver
 
 ### Running the Spring Boot backend
+
 In a separate terminal, navigate to the Spring Boot project directory:
 cd SpringAPIService/rest-serviceS/timeOpta
 
@@ -84,6 +87,7 @@ Review the results by clicking on 'Summary'. This will display the results of al
 
     
 #License
+
 This project is licensed under the MIT License.
 
 
@@ -94,4 +98,5 @@ This project is licensed under the MIT License.
 
 
 #Support
+
 If you encounter any issues or have questions, please open an issue on the GitHub repository.
