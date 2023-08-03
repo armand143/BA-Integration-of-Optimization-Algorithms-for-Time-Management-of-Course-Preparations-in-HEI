@@ -1,5 +1,5 @@
 
-# BA-Integration-of-Optimization-Algorithms-for-Time-Management-of-Course-Preparations-in-HEI 
+
 
 ## Thesis Project: Integration of Optimization Algorithms for Time Management of Course Preparations in Higher Education
 
@@ -30,7 +30,7 @@ To run this project, you will need:
 ## Installation
 
 Clone the repository:
-https://github.com/armand143/BA-Integration-of-Optimization-Algorithms-for-Time-Management-of-Course-Preparations-in-HEI.git
+https://github.com/armand143/timeOptimizer.git
 
 Change to the project directory:
 cd timeoptApp [DJANGO]
