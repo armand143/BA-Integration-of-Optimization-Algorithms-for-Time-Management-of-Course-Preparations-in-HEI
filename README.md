@@ -1,7 +1,7 @@
 
 
 
-## Thesis Project: Integration of Optimization Algorithms for Time Management of Course Preparations in Higher Education
+# Thesis Project: Integration of Optimization Algorithms for Time Management of Course Preparations in Higher Education
 
 This repository contains an extension to an existing course optimization system that helps lecturers allocate preparation time for different aspects of their courses, such as content, didactic, and presentation. The extension adds a new optimization method based on weighted averages, complementing the existing four optimization methods. The system connects a Django web application with a Spring Boot backend to provide a seamless user experience.
 
@@ -33,26 +33,25 @@ Clone the repository:
 https://github.com/armand143/timeOptimizer.git
 
 Change to the project directory:
-cd timeoptApp [DJANGO]
+cd timeoptApp
 
 
 ## Setting up the Django web application
 
-Set up a Python virtual environment and activate it:
+In your Terminal, set up a Python virtual environment and activate it:
 
-```bash
 python3 -m venv venv
-source venv/bin/activate
+source venv/Script/activate
 
 Install Django and other required Python packages:
 pip install -r requirements.txt
 
-Navigate to the Django project directory:
-cd timeoptApp [DJANGO]/timeoptApp
+Navigate to the Django project directory (where the manage.py file is located):
+cd timeoptApp/timeoptApp
 
 ## Setting up the Spring Boot backend
 
-Navigate to the Spring Boot project directory:
+In another terminal, navigate to the Spring Boot project directory(where the pom.xl file is located):
 cd SpringAPIService/rest-serviceS/timeOpta
 
 Build the Spring Boot application using Maven:
@@ -68,10 +67,7 @@ python manage.py runserver
 
 ### Running the Spring Boot backend
 
-In a separate terminal, navigate to the Spring Boot project directory:
-cd SpringAPIService/rest-serviceS/timeOpta
-
-Run the Spring Boot application:
+on the separate terminal in the Spring Boot project directory run the Spring Boot application:
 mvn spring-boot:run
 
 
