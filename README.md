@@ -1,7 +1,4 @@
-
-
-
-## Thesis Project: Integration of Optimization Algorithms for Time Management of Course Preparations in Higher Education
+# Thesis Project: Integration of Optimization Algorithms for Time Management of Course Preparations in Higher Education
 
 This repository contains an extension to an existing course optimization system that helps lecturers allocate preparation time for different aspects of their courses, such as content, didactic, and presentation. The extension adds a new optimization method based on weighted averages, complementing the existing four optimization methods. The system connects a Django web application with a Spring Boot backend to provide a seamless user experience.
 
@@ -29,74 +26,100 @@ To run this project, you will need:
 
 ## Installation
 
-Clone the repository:
-https://github.com/armand143/timeOptimizer.git
+1. Clone the repository:
 
-Change to the project directory:
-cd timeoptApp [DJANGO]
+    ```
+    git clone https://github.com/armand143/timeOptimizer.git
+    ```
 
+2. Change to the project directory:
+    ```
+    cd timeOptimizer
+    ```
 
-## Setting up the Django web application
+### Setting up the Django web application
 
-Set up a Python virtual environment and activate it:
+1. In your Terminal, set up a Python virtual environment and activate it:
 
-```bash
-python3 -m venv venv
-source venv/bin/activate
+    ```
+    python -m venv venv
 
-Install Django and other required Python packages:
-pip install -r requirements.txt
+    source venv/bin/activate   # Use 'venv\Scripts\activate' on Windows
+    ```
 
-Navigate to the Django project directory:
-cd timeoptApp [DJANGO]/timeoptApp
+2. Navigate to the Django project directory (where the `requirements.txt` file is located) then install Django and other required Python packages:
 
-## Setting up the Spring Boot backend
+    ```
+    cd webApp_django
+    pip install -r requirements.txt
+    ```
 
-Navigate to the Spring Boot project directory:
-cd SpringAPIService/rest-serviceS/timeOpta
+3. Run the Django migrations:
+    ```
+    python manage.py makemigrations
+    python manage.py migrate
+    ```
 
-Build the Spring Boot application using Maven:
-mvn clean install
+### Setting up the Spring Boot backend
 
+1. In another terminal, navigate to the Spring Boot project directory(where the `pom.xml` file is located):
+
+    ```
+    cd timeOptimizer_spring
+    ```
+
+2. Build the Spring Boot application using Maven:
+
+    ```
+    mvn clean install
+    ```
 
 ## Usage
 
 ### Running the Django web application
 
-Start the Django development server:
-python manage.py runserver
+1. Start the Django development server:
+    ```
+    python manage.py runserver
+    ```
 
 ### Running the Spring Boot backend
 
-In a separate terminal, navigate to the Spring Boot project directory:
-cd SpringAPIService/rest-serviceS/timeOpta
-
-Run the Spring Boot application:
-mvn spring-boot:run
-
+1. On the separate terminal in the Spring Boot project directory run the Spring Boot application:
+    ```
+    mvn spring-boot:run
+    ```
 
 ## Accessing the application
 
-Open your web browser and navigate to the Django web application:
-http://127.0.0.1:8000/
+1. Open your web browser and navigate to the Django web application:
+    ```
+    http://127.0.0.1:8000/
+    ```
 
-Create a new user and log in. Once logged in, you'll be directed to the Profile Page, where you can update your profile information, select already available courses or create new ones, and start the optimization process by clicking on the big green button below.
-On the next page, enter course parameter information in the provided form, along with an estimate of the time you think will be sufficient for each course. Tooltips are available on hover to provide more insight into each parameter.
-Click the 'Overview' button to summarize all completed optimization runs. On the next page, run the optimization process (click 'Optimize') to obtain the time allocation results.
-Review the results by clicking on 'Summary'. This will display the results of all optimization strategies along with an evaluation done using Mean Absolute Deviation (MAD) and Standard Deviation (STD) metrics.
+2. On the registration page, create a new user  and you will be logged in automatically.
 
-    
-#License
+3. Once logged in, you'll be directed to the Profile Page. Here, you can:
+   - Update your profile information
+   - Select already available courses or create new ones
 
-This project is licensed under the MIT License.
+4. Start the optimization process by clicking on the big green button below.
+
+5. On the next page, enter course parameter information in the provided form, along with an estimate of the time you think will be sufficient for each course. Tooltips are available on hover to provide more insight into each parameter.
+
+6. Click the 'Overview' button to summarize all completed optimization runs.
+
+7. On the next page, run the optimization process by clicking 'Optimize' to obtain the time allocation results.
+
+8. Review the results by clicking on 'Summary'. This will display the results of all optimization strategies along with an evaluation done using Mean Absolute Deviation (MAD) and Standard Deviation (STD) metrics.
 
 
-#Acknowledgements
+
+## Acknowledgements
 
 - Prof. Fuhrmann for providing the roots of this Project. Credits go to him for the time allocation algorithm that's been used here. 
 - My Advisor, Patrick Herbke, for his valuable feedback. 
 
-
-#Support
+## Support
 
 If you encounter any issues or have questions, please open an issue on the GitHub repository.
