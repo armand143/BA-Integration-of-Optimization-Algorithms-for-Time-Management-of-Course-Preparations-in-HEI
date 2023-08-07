@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> d824c712c2a3d2688a5b0c280e4bd9f30736722c
 # Thesis Project: Integration of Optimization Algorithms for Time Management of Course Preparations in Higher Education
 
 This repository contains an extension to an existing course optimization system that helps lecturers allocate preparation time for different aspects of their courses, such as content, didactic, and presentation. The extension adds a new optimization method based on weighted averages, complementing the existing four optimization methods. The system connects a Django web application with a Spring Boot backend to provide a seamless user experience.
@@ -28,9 +34,14 @@ To run this project, you will need:
 
 1. Clone the repository:
 
+<<<<<<< HEAD
     ```
     git clone https://github.com/armand143/timeOptimizer.git
     ```
+=======
+Change to the project directory:
+cd timeoptApp
+>>>>>>> d824c712c2a3d2688a5b0c280e4bd9f30736722c
 
 2. Change to the project directory:
     ```
@@ -39,26 +50,43 @@ To run this project, you will need:
 
 ### Setting up the Django web application
 
+<<<<<<< HEAD
 1. In your Terminal, set up a Python virtual environment and activate it:
 
     ```
     python -m venv venv
+=======
+In your Terminal, set up a Python virtual environment and activate it:
+
+python3 -m venv venv
+source venv/Script/activate
+>>>>>>> d824c712c2a3d2688a5b0c280e4bd9f30736722c
 
     source venv/bin/activate   # Use 'venv\Scripts\activate' on Windows
     ```
 
+<<<<<<< HEAD
 2. Navigate to the Django project directory (where the `requirements.txt` file is located) then install Django and other required Python packages:
+=======
+Navigate to the Django project directory (where the manage.py file is located):
+cd timeoptApp/timeoptApp
+>>>>>>> d824c712c2a3d2688a5b0c280e4bd9f30736722c
 
     ```
     cd webApp_django
     pip install -r requirements.txt
     ```
 
+<<<<<<< HEAD
 3. Run the Django migrations:
     ```
     python manage.py makemigrations
     python manage.py migrate
     ```
+=======
+In another terminal, navigate to the Spring Boot project directory(where the pom.xl file is located):
+cd SpringAPIService/rest-serviceS/timeOpta
+>>>>>>> d824c712c2a3d2688a5b0c280e4bd9f30736722c
 
 ### Setting up the Spring Boot backend
 
@@ -85,10 +113,16 @@ To run this project, you will need:
 
 ### Running the Spring Boot backend
 
+<<<<<<< HEAD
 1. On the separate terminal in the Spring Boot project directory run the Spring Boot application:
     ```
     mvn spring-boot:run
     ```
+=======
+on the separate terminal in the Spring Boot project directory run the Spring Boot application:
+mvn spring-boot:run
+
+>>>>>>> d824c712c2a3d2688a5b0c280e4bd9f30736722c
 
 ## Accessing the application
 
