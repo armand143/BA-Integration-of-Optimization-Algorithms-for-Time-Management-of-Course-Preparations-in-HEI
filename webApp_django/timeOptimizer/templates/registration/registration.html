@@ -1,0 +1,72 @@
+
+
+{% extends 'base.html' %}
+
+{% block title %} REGISTRATION {% endblock %}
+
+{% block content %}
+<div class="container-fluid d-flex align-items-center mt-4 justify-content-center min-vh-100">
+
+
+    <div class="row">
+
+                <div class="card mb-5 login-card">
+                    <div class="card-body">
+                        <h4 class="text-white text-center">Registration</h4>
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                          <ul>
+                            {% for field, errors in form.errors.items %}
+                              {% for error in errors %}
+                                <li>{{ field|title }}: {{ error }}</li>
+                              {% endfor %}
+                            {% endfor %}
+                          </ul>
+                        </div>
+                      {% endif %}
+                      <form method="post">
+                        {% csrf_token %}
+                        <div class="row mb-3">
+                            <div class="col-sm-6">
+                                <label for="{{ form.username.id_for_label }}" class="form-label text-white">{{ form.username.label }}</label>                                <br>
+                                {{ form.username }}
+                            </div>
+
+                            <div class="col-sm-6">
+                                <label for="{{ form.title.id_for_label }}" class="form-label text-white">{{ form.title.label }}</label>                                <br>
+                                {{ form.title }}
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <label for="{{ form.email.id_for_label }}" class="form-label text-white">{{ form.email.label }}</label>
+                                <br>
+                                {{ form.email }}
+                            </div>
+
+                        </div>
+                        <div class="row mb-3">
+                          <div class="col-sm-6">
+                            <label for="{{ form.password1.id_for_label }}" class="form-label text-white">{{ form.password1.label }}</label>
+                            <br>
+                            {{ form.password1 }}
+                          </div>
+                          <div class="col-sm-6">
+                            <label for="{{ form.password2.id_for_label }}" class="form-label text-white">{{ form.password2.label }}</label> 
+                            <br>
+                            {{ form.password2 }}
+                          </div>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-dark">register</button><br>
+                            <a href="{% url 'login_view' %}" class="text-white"> already registered? then Login <strong>here </strong></a>
+                        </div>
+                      </form>
+                    </div>
+                </div>
+ 
+
+    </div>
+
+</div>
+{% endblock %}
