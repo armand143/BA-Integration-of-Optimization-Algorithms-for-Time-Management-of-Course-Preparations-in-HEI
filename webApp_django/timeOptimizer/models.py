@@ -49,8 +49,10 @@ class course(models.Model):
 
 class semester(models.Model):
     semester_name = models.CharField(max_length=250)
-    semesterModules = models.JSONField(default={"":{}}) #Should be used to control to the availability of different courses
-    coursesInSemester = models.JSONField(default={"":{}})
+    semesterModules = models.JSONField(default= dict) #Should be used to control to the availability of different courses
+    coursesInSemester = models.JSONField(default= dict)
+    # semesterModules = models.JSONField(default={"":{}}) #Should be used to control to the availability of different courses
+    # coursesInSemester = models.JSONField(default={"":{}})
 
     def __str__(self):
         return self.semester_name
@@ -145,7 +147,7 @@ class optResults(models.Model):
         optimalValue = models.FloatField(default=0.0)
         # lecturer = models.ForeignKey(lecturer, on_delete=models.CASCADE)
         optimizationResults = models.JSONField()
-        evaluation_metrics = models.JSONField(default={})
+        evaluation_metrics = models.JSONField(default = dict)
         optDataObj = models.OneToOneField(optData, on_delete=models.CASCADE, related_name='opt_results', default=1)
         created_at = models.DateTimeField(auto_now_add=True)
         edited_at = models.DateTimeField(auto_now=True)
