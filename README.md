@@ -60,6 +60,17 @@ To run this project, you will need:
     python manage.py migrate
     ```
 
+4. Create an Administrator for administrative actions:
+    ```
+    python manage.py createsuperuser
+    ```
+
+    Then login as Administrator here:
+        ```
+    http://127.0.0.1:8000/admin
+    ```
+
+
 ### Setting up the Spring Boot backend
 
 1. In another terminal, navigate to the Spring Boot project directory(where the `pom.xml` file is located):
