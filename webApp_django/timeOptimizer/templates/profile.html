@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+
+
+{% block css %}
+{{ block.super }}
+<style>
+    .footer {
+        background-color: #568076;
+        color: #ffffff;
+        text-align: center;
+        padding: 1rem;
+        width: 100%;
+        z-index: 2;
+        /* Ensure the footer stays above the vertical lines */
+        position: relative;
+        bottom: 0;
+
+    }
+
+    .my-button {
+        display: block;
+        margin: 20px auto;
+        padding: 10px 20px;
+        font-size: 20px;
+        font-weight: bold;
+        color: #fff;
+        background-color: #198754;
+        border: none;
+        border-radius: 5px;
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+
+    }
+
+    .my-button:hover {
+        text-decoration: none;
+        background-color: #aaf1d0;
+
+
+    }
+
+    .tooltip-icon-courses {
+        display: inline-block;
+        background-color: #333;
+        color: #fff;
+        border-radius: 50%;
+        font-size: 12px;
+        font-weight: bold;
+        width: 16px;
+        height: 16px;
+        text-align: center;
+        cursor: help;
+        margin-left: 4px;
+        line-height: 16px;
+        position: relative;
+    }
+
+    .tooltip-icon-courses:hover::after {
+        content: attr(title);
+        position: absolute;
+        background-color: #568076;
+        color: #fff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 13px;
+        z-index: 10;
+        white-space: pre-wrap;
+        left: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-left: 8px;
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="jumbotron text-center mt-2">
+    <div class="row">
+        <div class="col-md-4">
+            <!-- <img src="{{ request.user.lecturer_profile.profile_picture.url }}" alt="Profile Picture" class="rounded-circle" style="width: 200px; height: 200px;"> -->
+
+        </div>
+
+        <div class="col-md-8">
+
+            {% if request.user.is_authenticated and request.user.lecturer_profile %}
+            <h1>Welcome {{ request.user.lecturer_profile.title }} {{ request.user.lecturer_profile.lecturer_name }}</h1>
+            {% else %}
+            <p>Welcome, anonymous user!</p>
+            {% endif %}
+
+            <div class="card mx-auto text-center" style="max-width: 60%;">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        {% for field in LecturerForm %}
+                        <div class="form-group row">
+                            <label class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                        </div>
+                        {% endfor %}
+                        <br>
+                        <div class="text-center">
+                            <button type="submit" class="btn-sm btn-secondary"
+                                name="updateLecturer-submit">update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+</div>
+
+
+<hr>
+<br>
+
+<div class="row ">
+    <div class="col-md-6">
+        <h5>Infos for time optimization of course preparation:</h5>
+
+        <div class="row">
+
+            <div class="col-md-6">
+                <div class="card profile_cards">
+                    <div class="card-body">
+                        <h5 class="card-title">Already available courses:</h5>
+                        {% for course in other_courses %}
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="tooltip-icon-courses d-inline-block" data-toggle="tooltip" data-html="true"
+                                    data-placement="right" title="{{course.course_description}}" data-original-title="">
+                                    i
+                                </span>
+                                <span class="d-inline-block ml-2">
+                                    {{ course.course_name }}
+                                </span>
+                            </div>
+
+                            <a href="{% url 'addCourse' course.id %}" class="btn-sm btn-success ml-auto"> + </a>
+                        </div>
+                        <hr>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Edit or delete courses</h5>
+                <div class="card profile_cards">
+                    <div class="card-body">
+                        <h5 class="card-title">my courses</h5>
+                        {% for course in request.user.lecturer_profile.courseOffered.all %}
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            {% if course.lecturer_name == request.user.lecturer_profile.lecturer_name %}
+                            <a href = "{% url 'editCourseDetail' course.id %}">
+                                {{course}}
+                            </a>
+                            {% else %}
+                                {{course}}
+                            {% endif %}
+
+                            <a href="{% url 'deleteCourse' course.id %}" class="btn-sm btn-danger"> x </a>
+                        </div>
+
+                        <hr>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-md-6">
+                <h5>Create New Course</h5>
+                <div class=card>
+                    <div class="card-body">
+                        <form method="POST">
+                            {% csrf_token %}
+                            {% for field in course_form %}
+                            <div class="row ">
+                                <div class="form-group ">
+                                    <label for="{{ field.auto_id }}">
+                                        {{field.label}}
+                                    </label> <br>
+                                    {{ field }}
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                            <button type="submit" name="course_form-submit" class="btn-sm btn-success">save</button>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+    </div>
+</div>
+
+<div class="row">
+    <a href="{% url 'createOptData' %}" class="my-button">Start new optimization process</a>
+
+</div>
+
+
+
+{% endblock %}

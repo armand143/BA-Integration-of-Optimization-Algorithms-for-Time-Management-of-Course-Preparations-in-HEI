@@ -1,0 +1,32 @@
+version: '3'
+services:
+  django:
+    build: ./timeoptApp #Path to the Django app's Dockerfile directory
+    ports:
+      - "8000:8000"     # Expose Django app on port 8000
+
+    depends_on:
+      - db  # Ensure the database service is started before Django
+
+    command: >
+      bash -c "python3 manage.py migrate &&
+              python3 manage.py runserver 0.0.0.0:8000"
+
+
+  spring:
+    build: ./SpringAPIService
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      - db  # Ensure the database service is started before Django
+
+
+  db:
+    image: postgres:latest  # Use the latest PostgreSQL image
+    environment:
+      POSTGRES_DB: timeOptApp  # Set the name of the PostgreSQL database
+      POSTGRES_USER: postgres  # Set the PostgreSQL username
+      POSTGRES_PASSWORD: 1200000qQ  # Set the PostgreSQL password
+    ports:
+      - "5432:5432"  # Expose PostgreSQL on port 5432
