@@ -30,14 +30,14 @@ SECRET_KEY = 'django-insecure-rw1)=%i0gs*nn@@e79^rxh8)&az++17%k)ic6h@7u%_%2!omun
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0']
 
 # Get the port number from the 'PORT' environment variable
-port = os.getenv('PORT', '8000')  # Use '8000' as the default port if 'PORT' is not set
+# port = os.getenv('PORT', '8000')  # Use '8000' as the default port if 'PORT' is not set
 
-# Use the port number when running the server
-command = f'python manage.py runserver 0.0.0.0:{port}'
-os.system(command)
+# # Use the port number when running the server
+# command = f'python manage.py runserver 0.0.0.0:{port}'
+# os.system(command)
 
 
 # Application definition
