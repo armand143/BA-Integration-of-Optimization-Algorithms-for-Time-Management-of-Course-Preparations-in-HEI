@@ -32,6 +32,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['0.0.0.0', 'timeoptimizer-production.up.railway.app']
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://timeoptimizer-production.up.railway.app",
+]
+
+
 # Get the port number from the 'PORT' environment variable
 # port = os.getenv('PORT', '8000')  # Use '8000' as the default port if 'PORT' is not set
 
