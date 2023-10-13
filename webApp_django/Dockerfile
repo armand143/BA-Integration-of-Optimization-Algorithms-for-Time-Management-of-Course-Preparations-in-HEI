@@ -41,6 +41,10 @@ RUN pip install -r requirements.txt
 # Run collectstatic command
 RUN python manage.py collectstatic --noinput
 
+# Applying database migrations
+# This runs at build time, consider running it at start time
+RUN python manage.py migrate
+
 # (Optional) Command to run the application using Gunicorn
 CMD ["gunicorn", "timeoptApp.wsgi:application", "--bind", "0.0.0.0:8000"]
 
