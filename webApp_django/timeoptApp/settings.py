@@ -96,28 +96,6 @@ WSGI_APPLICATION = 'timeoptApp.wsgi.application'
 #     }
 # }
 
-# DATABASES = {
-#     'default': {
-#     'ENGINE': 'django.db.backends.postgresql',
-#     'NAME': 'timeOptApp',
-#     'USER': 'postgres',
-#     'PASSWORD': '1200000qQ',
-#     'HOST': 'db',
-#     'PORT': '5432'
-#             }
-# }
-
-# With railway's database_url:
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'railway',
-#         'USER': 'postgres',
-#         'PASSWORD': 'pSgTC4XdL1BfesME9IMk',
-#         'HOST': 'containers-us-west-125.railway.app',
-#         'PORT': '6263',
-#     }
-# }
 
 env = environ.Env()
 
