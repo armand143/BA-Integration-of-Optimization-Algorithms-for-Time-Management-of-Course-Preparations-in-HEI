@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 import os
 from pathlib import Path
-# import dj_database_url
+import dj_database_url
 import environ
 
 
@@ -97,12 +97,15 @@ WSGI_APPLICATION = 'timeoptApp.wsgi.application'
 # }
 
 
-env = environ.Env()
+# env = environ.Env()
+
+# DATABASES = {
+#     'default': env.db('postgresql://postgres:pSgTC4XdL1BfesME9IMk@containers-us-west-125.railway.app:6263/railway')
+# }
 
 DATABASES = {
-    'default': env.db('postgresql://postgres:pSgTC4XdL1BfesME9IMk@containers-us-west-125.railway.app:6263/railway')
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
-
 
 
 # Password validation
