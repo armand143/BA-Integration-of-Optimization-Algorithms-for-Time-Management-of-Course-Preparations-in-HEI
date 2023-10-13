@@ -95,22 +95,29 @@ WSGI_APPLICATION = 'timeoptApp.wsgi.application'
 #     }
 # }
 
-DATABASES = {
-    'default': {
-    'ENGINE': 'django.db.backends.postgresql',
-    'NAME': 'timeOptApp',
-    'USER': 'postgres',
-    'PASSWORD': '1200000qQ',
-    'HOST': 'db',
-    'PORT': '5432'
-            }
-}
+# DATABASES = {
+#     'default': {
+#     'ENGINE': 'django.db.backends.postgresql',
+#     'NAME': 'timeOptApp',
+#     'USER': 'postgres',
+#     'PASSWORD': '1200000qQ',
+#     'HOST': 'db',
+#     'PORT': '5432'
+#             }
+# }
 
 # With railway's database_url:
 
-# DATABASES = {
-#     'default': dj_database_url.config(default='<postgres://yixkupdycqjctu:d071f23953b88ecb3274872ad1df834d28add6f5cb20a7123ff0627231ebcd4b@ec2-34-246-86-78.eu-west-1.compute.amazonaws.com:5432/d9kjegcndojaar>')
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.getenv('DATABASE_NAME'),
+        'USER': os.getenv('DATABASE_USER'),
+        'PASSWORD': os.getenv('DATABASE_PASSWORD'),
+        'HOST': os.getenv('DATABASE_HOST'),
+        'PORT': os.getenv('DATABASE_PORT'),
+    }
+}
 
 
 

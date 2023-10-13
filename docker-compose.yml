@@ -25,8 +25,14 @@ services:
   db:
     image: postgres:latest  # Use the latest PostgreSQL image
     environment:
-      POSTGRES_DB: timeOptApp  # Set the name of the PostgreSQL database
-      POSTGRES_USER: postgres  # Set the PostgreSQL username
-      POSTGRES_PASSWORD: 1200000qQ  # Set the PostgreSQL password
-    ports:
-      - "5432:5432"  # Expose PostgreSQL on port 5432
+      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+
+
+    # environment:
+    #   POSTGRES_DB: timeOptApp  # Set the name of the PostgreSQL database
+    #   POSTGRES_USER: postgres  # Set the PostgreSQL username
+    #   POSTGRES_PASSWORD: 1200000qQ  # Set the PostgreSQL password
+    # ports:
+    #   - "5432:5432"  # Expose PostgreSQL on port 5432
