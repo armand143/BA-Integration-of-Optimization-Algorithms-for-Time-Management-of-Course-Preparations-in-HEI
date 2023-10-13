@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 # import dj_database_url
+import environ
 
 
 # from django.contrib.auth import get_user_model
@@ -107,17 +108,22 @@ WSGI_APPLICATION = 'timeoptApp.wsgi.application'
 # }
 
 # With railway's database_url:
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'pSgTC4XdL1BfesME9IMk',
-        'HOST': 'containers-us-west-125.railway.app',
-        'PORT': '6263',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'railway',
+#         'USER': 'postgres',
+#         'PASSWORD': 'pSgTC4XdL1BfesME9IMk',
+#         'HOST': 'containers-us-west-125.railway.app',
+#         'PORT': '6263',
+#     }
+# }
 
+env = environ.Env()
+
+DATABASES = {
+    'default': env.db('postgresql://postgres:pSgTC4XdL1BfesME9IMk@containers-us-west-125.railway.app:6263/railway')
+}
 
 
 
