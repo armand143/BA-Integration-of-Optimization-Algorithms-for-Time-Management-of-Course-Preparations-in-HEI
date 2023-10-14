@@ -296,7 +296,7 @@ def optimizerWebService(request, optDataID):
 
             corresponding_optresults = optResults.objects.filter(optDataObj = opt_obj)[0] #get the opt_result object for chosen opt_data
 
-            url = 'timeoptimizer_spring.railway.internal/api/optimize'
+            url = 'http://host.docker.internal:8080/api/optimize'
             headers = {'Content-type': 'application/json'}
             response = requests.post(url, json = json_obj, headers = headers)
 
