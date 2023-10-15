@@ -32,6 +32,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['0.0.0.0', 'timeoptimizer-production.up.railway.app']
 
+# ALLOWED_HOSTS = []
+
+
 CSRF_TRUSTED_ORIGINS = [
     "https://timeoptimizer-production.up.railway.app",
 ]
@@ -115,6 +118,7 @@ WSGI_APPLICATION = 'timeoptApp.wsgi.application'
 #     'default': env.db('postgresql://postgres:pSgTC4XdL1BfesME9IMk@containers-us-west-125.railway.app:6263/railway')
 # }
 
+########### Use this for railway ######### 
 DATABASES = {
     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
