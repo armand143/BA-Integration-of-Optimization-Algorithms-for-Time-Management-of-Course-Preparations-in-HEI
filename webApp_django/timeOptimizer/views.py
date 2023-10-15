@@ -330,9 +330,15 @@ def optimizerWebService(request, optDataID):
 
 
             else:
-                # Handle the error
-                pass
+                # # Handle the error
+                # pass
 
+                # return HttpResponse("Something went wrong!")
+                
+                # Log or print the error information for debugging purposes
+                print(f"Error: Received status code {response.status_code}")
+                print(response.text)  # Print the response body to get more details about the error
+                
                 return HttpResponse("Something went wrong!")
 
 
