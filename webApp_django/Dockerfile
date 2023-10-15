@@ -46,5 +46,5 @@ RUN python manage.py collectstatic --noinput
 # RUN python manage.py migrate
 
 # (Optional) Command to run the application using Gunicorn
-CMD ["sh", "-c", "python manage.py migrate && gunicorn timeoptApp.wsgi:application --bind 0.0.0.0:8000 --timeout 120"]
+CMD ["sh", "-c", "python manage.py migrate && gunicorn timeoptApp.wsgi:application --bind 0.0.0.0:8000 --timeout 1200"]
 
