@@ -704,7 +704,6 @@ def editCourse(request, optData_id, key):
             return render(request, 'optData.html', context)
 
             
-    
     else: 
         # current_form.fields['picked_course'].initial = course.objects.get(course_name = key)
         current_form.fields['courseEstTime'].initial = current_course['courseEstTime']['expectedAllocation']
