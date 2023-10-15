@@ -24,7 +24,7 @@ FROM openjdk:17-jdk-slim
 COPY --from=builder /app/app.jar /usr/app/timeOpta-0.0.1-SNAPSHOT.jar
 
 # Expose the port the app runs on
-EXPOSE 80
+EXPOSE 8080
 
 # Run the app
 CMD ["java", "-jar", "/usr/app/timeOpta-0.0.1-SNAPSHOT.jar"]
