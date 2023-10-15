@@ -1,0 +1,13 @@
+tf\lehroptimierung\semester\AspectContent.class
+tf\lehroptimierung\optimization\SemOpti_Local.class
+tf\lehroptimierung\semester\SemesterTimes.class
+tf\lehroptimierung\optimization\SemOpti_BruteForce.class
+tf\lehroptimierung\semester\AspectDidactic.class
+tf\lehroptimierung\semester\AspectPresentation.class
+tf\lehroptimierung\controllers\ServiceController.class
+tf\lehroptimierung\semester\Course.class
+tf\lehroptimierung\semester\Semester.class
+tf\lehroptimierung\Main.class
+tf\lehroptimierung\TimeOptaApplication.class
+tf\lehroptimierung\optimization\SemOpti_Random.class
+tf\lehroptimierung\semester\weights.class
