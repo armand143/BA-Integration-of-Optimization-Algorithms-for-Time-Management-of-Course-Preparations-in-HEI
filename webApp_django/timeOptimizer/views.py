@@ -322,17 +322,6 @@ def optimizerWebService(request, optDataID):
                 #display msg "(new)" if just computed
                 current_optData_list = optData.objects.filter(lecturer = current_lecturer)
 
-                # #after optimization computation, the main optData is added back to list that'll be displayed:
-                # filtered_list_no_dups.append(optData_ready)
-
-                # #update status to signal results ready
-                # for opt_data in filtered_list_no_dups:
-                #         if opt_data.opt_results == corresponding_optresults:
-                #             corresponding_optresults.update_status = "(new)"
-                #             corresponding_optresults.save()
-                #         else:
-                #             opt_data.opt_results.update_status = ""
-                #             opt_data.opt_results.save()
 
                 corresponding_optresults.update_status = "(new)"
                 corresponding_optresults.optMethod = opt_obj.optMethod
