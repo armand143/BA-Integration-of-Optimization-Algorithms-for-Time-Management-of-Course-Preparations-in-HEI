@@ -296,7 +296,7 @@ def optimizerWebService(request, optDataID):
 
             corresponding_optresults = optResults.objects.filter(optDataObj = opt_obj)[0] #get the opt_result object for chosen opt_data
 
-            url = 'http://timeoptimizerspring-production.up.railway.app/api/optimize'
+            url = 'http://timeoptimizerspring-production.up.railway.app:8080/api/optimize'
             headers = {'Content-type': 'application/json'}
             response = requests.post(url, json = json_obj, headers = headers)
 
@@ -334,7 +334,7 @@ def optimizerWebService(request, optDataID):
                 # pass
 
                 # return HttpResponse("Something went wrong!")
-                
+
                 # Log or print the error information for debugging purposes
                 print(f"Error: Received status code {response.status_code}")
                 print(response.text)  # Print the response body to get more details about the error
